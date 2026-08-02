@@ -54,8 +54,10 @@ quotes, and the kill-rule reasoning: `docs/phase0_5_findings.md`. Judgment calls
 
 ## Open items
 
-1. **Abdullah:** paste the Phase 0 deliverable into `docs/phase0.md`; reconcile the
-   [INFERRED] M1/M3/M5/M7–M9/M11 labels in `docs/phase0_5_findings.md`.
+1. **Abdullah:** re-send the Phase 0 deliverable so it can be saved verbatim into
+   `docs/phase0.md` (the reconciliation-pass attachment never reached the build
+   environment). Taxonomy renumbering to canonical Phase-0 IDs is already DONE
+   (findings §5, decisions D19); only the verbatim snapshot is missing.
 2. **Abdullah:** fill `models.yaml` (≥3 models, ≥1 reasoning model for H4) and create
    `.env` with the referenced keys. Never commit keys.
 3. **Research lead:** deliver content for the 27 stub sets (next session), authored
