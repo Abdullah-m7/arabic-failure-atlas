@@ -1,0 +1,7 @@
+results/raw/
+.env
+__pycache__/
+*.key
+*.pyc
+.pytest_cache/
+*.egg-info/
