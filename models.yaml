@@ -1,0 +1,39 @@
+# Arabic Failure Atlas — model roster TEMPLATE.
+#
+# Abdullah: replace every PLACEHOLDER_* value. Keys live in .env (gitignored),
+# referenced here by env-var name only — NEVER paste a key into this file.
+# Requirement: >= 3 models, including >= 1 thinking/reasoning model (H4).
+#
+# atlas.run refuses to start while any PLACEHOLDER value remains.
+
+models:
+  # -- openai_compatible covers OpenAI, vLLM, Ollama (/v1), OpenRouter, Groq --
+  - name: PLACEHOLDER_model_a          # e.g. a frontier non-reasoning model
+    adapter: openai_compatible
+    base_url: PLACEHOLDER_https_base_url_v1
+    api_key_env: OPENAI_API_KEY
+    model: PLACEHOLDER_model_id
+    invocation_style: native           # or "prompt" for models without native FC
+
+  - name: PLACEHOLDER_model_b_reasoning  # H4: at least one thinking/reasoning model
+    adapter: openai_compatible
+    base_url: PLACEHOLDER_https_base_url_v1
+    api_key_env: OPENROUTER_API_KEY
+    model: PLACEHOLDER_reasoning_model_id
+    invocation_style: native
+
+  - name: PLACEHOLDER_model_c
+    adapter: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    model: PLACEHOLDER_model_id
+
+  # -- optional: local transformers model (requires transformers + torch) ----
+  # - name: local-model
+  #   adapter: hf_local
+  #   model: PLACEHOLDER_hf_repo_id
+  #   invocation_style: prompt
+
+  # -- offline pipeline proof only (not a model; see docs/decisions.md D9) ---
+  # - name: fixtures-smoke
+  #   adapter: fixtures
+  #   fixtures_path: harness/tests/fixtures/model_outputs_pass.jsonl
