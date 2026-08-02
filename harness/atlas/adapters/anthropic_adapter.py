@@ -82,7 +82,7 @@ class AnthropicAdapter(Adapter):
                     {
                         "type": "tool_result",
                         "tool_use_id": block.get("id", ""),
-                        "content": canned_tool_output(block.get("name", "")),
+                        "content": canned_tool_output(block.get("name", ""), task),
                     }
                 )
             messages.append({"role": "user", "content": results})

@@ -66,7 +66,7 @@ class HFLocalAdapter(Adapter):
                 pred_calls.append(
                     {"name": name, "args": call.get("arguments", call.get("args", {})) or {}}
                 )
-                tool_msgs.append(f"Tool {name} returned: {canned_tool_output(name)}")
+                tool_msgs.append(f"Tool {name} returned: {canned_tool_output(name, task)}")
             messages.append({"role": "user", "content": "\n".join(tool_msgs) or "Tool output unavailable."})
         else:
             output_error = output_error or f"no final answer after {MAX_TOOL_ROUNDS} tool rounds"

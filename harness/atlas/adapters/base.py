@@ -22,7 +22,12 @@ class TransportError(Exception):
 MAX_TOOL_ROUNDS = 4
 
 
-def canned_tool_output(tool_name: str) -> str:
+def canned_tool_output(tool_name: str, task: dict | None = None) -> str:
+    """Task-declared canned output for this tool if present (task['tool_outputs']),
+    else a generic English success payload (see docs/decisions.md D18)."""
+    declared = (task or {}).get("tool_outputs") or {}
+    if tool_name in declared:
+        return declared[tool_name]
     return json.dumps(
         {"status": "success", "message": f"Executed {tool_name} successfully."}
     )

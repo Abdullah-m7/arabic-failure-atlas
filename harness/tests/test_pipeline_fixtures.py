@@ -2,12 +2,23 @@
 run -> raw results -> report -> fingerprint + deltas."""
 
 import json
+import shutil
 from pathlib import Path
 
 from atlas import report, run
 
 REPO = Path(__file__).resolve().parents[2]
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+
+def _seed_tasks_dir(tmp_path: Path) -> Path:
+    """The fixture model outputs cover only the 3 seed sets; give run/report a
+    task dir containing exactly those (the full pilot pool is 80 tasks)."""
+    tasks = tmp_path / "tasks"
+    tasks.mkdir(exist_ok=True)
+    for name in ("m2_seed.jsonl", "m4_seed.jsonl", "m6_seed.jsonl"):
+        shutil.copy(REPO / "tasks" / "pilot" / name, tasks / name)
+    return tasks
 
 
 def _models_yaml(tmp_path: Path) -> Path:
@@ -30,7 +41,7 @@ def test_full_pipeline_on_fixtures(tmp_path):
     summaries = tmp_path / "summaries"
 
     assert run.main([
-        "--tasks", str(REPO / "tasks" / "pilot"),
+        "--tasks", str(_seed_tasks_dir(tmp_path)),
         "--models", str(_models_yaml(tmp_path)),
         "--out", str(raw),
         "--seed", "7",
@@ -46,7 +57,7 @@ def test_full_pipeline_on_fixtures(tmp_path):
 
     assert report.main([
         "--raw", str(raw),
-        "--tasks", str(REPO / "tasks" / "pilot"),
+        "--tasks", str(_seed_tasks_dir(tmp_path)),
         "--out", str(summaries),
         "--bootstrap", "200",
         "--seed", "7",
