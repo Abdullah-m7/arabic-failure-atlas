@@ -41,6 +41,9 @@ class OpenAICompatibleAdapter(Adapter):
         key_env = config.get("api_key_env")
         self.api_key = os.environ.get(key_env, "") if key_env else config.get("api_key", "")
         self.timeout = config.get("timeout_s", 120)
+        # Per-model extra request params merged verbatim into every request body
+        # (e.g. Ollama's think: true/false, reasoning effort). See decisions D20.
+        self.extra_body = dict(config.get("extra_body") or {})
 
     def _post(self, payload: dict) -> dict:
         headers = {"Content-Type": "application/json"}
@@ -85,6 +88,7 @@ class OpenAICompatibleAdapter(Adapter):
                 "messages": messages,
                 "tools": tools,
                 "temperature": 0,
+                **self.extra_body,
             }
             data = self._post(payload)
             transcript.append({"request": payload, "response": data})
@@ -133,7 +137,8 @@ class OpenAICompatibleAdapter(Adapter):
         final_text, output_error = "", None
 
         for _ in range(MAX_TOOL_ROUNDS + 1):
-            payload = {"model": self.model, "messages": messages, "temperature": 0}
+            payload = {"model": self.model, "messages": messages, "temperature": 0,
+                       **self.extra_body}
             data = self._post(payload)
             transcript.append({"request": payload, "response": data})
             content = ((data.get("choices") or [{}])[0].get("message", {}).get("content")) or ""

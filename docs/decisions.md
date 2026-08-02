@@ -117,3 +117,28 @@ in the build environment (repo, home, /mnt, scratchpad all checked), so the
 "save verbatim + FROZEN header" step is deferred rather than fabricated; the
 placeholder in docs/phase0.md records this. Repo-wide grep confirms code, tasks,
 schema, and scorers reference only the unchanged M2/M4/M6.
+
+**D20 — 2026-08-02 — Provider switch to Ollama Cloud Pro; per-model `extra_body`
+pass-through added to openai_compatible.** Model configs may now carry
+`extra_body: {...}` merged verbatim into every request body (native and
+prompt-style), used for Ollama's `think: true/false`. Covered by
+tests/test_extra_body.py. Endpoint choice for the think toggle (OpenAI-compat
+/v1 with `think` in body vs native /api/chat) could NOT be settled empirically —
+see D21 — so /v1+extra_body is configured as primary and
+`scripts/probe_ollama.py --native` stands ready as the fallback path; the probe
+re-run after quota reset decides.
+
+**D21 — 2026-08-02 — Probes and smoke blocked by exhausted weekly quota; A/B
+family chosen from documentation.** The catalog fetch authenticated fine (18
+cloud models listed), but every inference call returned HTTP 429 "weekly usage
+limit reached" (confirmed account-wide on qwen3.5:397b and gpt-oss:20b; ~3 tiny
+probes spent, then stopped). Roster decided without live probes: the catalog has
+no classic qwen3 hybrid-think cloud model, and qwen3.5's think-toggle support is
+undocumented on its model page, while deepseek-v4-flash documents explicit
+no-think/think/max-think modes (Medium usage, 13B active MoE) — so per the
+mission's own fallback rule, H4 arms A/B = deepseek-v4-flash think on/off;
+C = gpt-oss:20b (level-1); D = qwen3.5:397b (different family, defaults).
+The Ollama smoke (M2-001/M4-001/M6-001 on C only) is DEFERRED until the weekly
+window resets; exact resume commands are in
+results/summaries/20260802-ollama-smoke/README.md. No hardcoded model ids —
+everything above came from the live catalog.

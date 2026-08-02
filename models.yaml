@@ -1,37 +1,47 @@
-# Arabic Failure Atlas — model roster TEMPLATE.
+# Arabic Failure Atlas — model roster: OLLAMA CLOUD PRO (switched 2026-08-02;
+# OpenRouter cancelled). OpenAI-compatible endpoint, marginal pilot cost $0.
+# Key lives in .env (gitignored) as OLLAMA_API_KEY — NEVER paste a key here.
 #
-# Abdullah: replace every PLACEHOLDER_* value. Keys live in .env (gitignored),
-# referenced here by env-var name only — NEVER paste a key into this file.
-# Requirement: >= 3 models, including >= 1 thinking/reasoning model (H4).
-#
-# atlas.run refuses to start while any PLACEHOLDER value remains.
+# Catalog discovered live from https://ollama.com/v1/models (18 cloud models,
+# 2026-08-02). Usage-level rule: level 1-2 only, no 1T-class giants.
+# H4 arms A/B = SAME weights with reasoning toggled (cleanest isolation).
+# NOTE: qwen3 classic hybrid-think cloud model absent from catalog; per the
+# mission's fallback rule A/B use deepseek-v4-flash (284B MoE / 13B active,
+# Medium usage, documented think modes). qwen3.5:397b (Medium) taken as the
+# different-family D entry. See docs/decisions.md D21.
 
 models:
-  # -- openai_compatible covers OpenAI, vLLM, Ollama (/v1), OpenRouter, Groq --
-  - name: PLACEHOLDER_model_a          # e.g. a frontier non-reasoning model
+  - name: deepseek-v4-flash-think        # H4 arm 1: reasoning ON
     adapter: openai_compatible
-    base_url: PLACEHOLDER_https_base_url_v1
-    api_key_env: OPENAI_API_KEY
-    model: PLACEHOLDER_model_id
-    invocation_style: native           # or "prompt" for models without native FC
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: deepseek-v4-flash
+    invocation_style: native
+    extra_body:
+      think: true
 
-  - name: PLACEHOLDER_model_b_reasoning  # H4: at least one thinking/reasoning model
+  - name: deepseek-v4-flash-nothink      # H4 arm 2: SAME model id, reasoning OFF
     adapter: openai_compatible
-    base_url: PLACEHOLDER_https_base_url_v1
-    api_key_env: OPENROUTER_API_KEY
-    model: PLACEHOLDER_reasoning_model_id
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: deepseek-v4-flash
+    invocation_style: native
+    extra_body:
+      think: false
+
+  - name: gpt-oss-20b                    # level-1, P1-comparable
+    adapter: openai_compatible
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: gpt-oss:20b
     invocation_style: native
 
-  - name: PLACEHOLDER_model_c
-    adapter: anthropic
-    api_key_env: ANTHROPIC_API_KEY
-    model: PLACEHOLDER_model_id
-
-  # -- optional: local transformers model (requires transformers + torch) ----
-  # - name: local-model
-  #   adapter: hf_local
-  #   model: PLACEHOLDER_hf_repo_id
-  #   invocation_style: prompt
+  - name: qwen3.5-397b                   # different family, provider defaults
+    adapter: openai_compatible
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: qwen3.5:397b
+    invocation_style: native
 
   # -- offline pipeline proof only (not a model; see docs/decisions.md D9) ---
   # - name: fixtures-smoke
