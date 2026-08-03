@@ -1,0 +1,17 @@
+# Limitations Inventory (bullets only — prose is the research lead's)
+
+- n=10 matched sets per mechanism (pilot scale) — [acknowledged; future-work: Phase-2 scale-up + held-out split]
+- single provider (Ollama Cloud), single quota pool — [mitigated-by: adapter-effect check Δ≤0.05; future-work: second provider replication]
+- 4 open-weight arms; no closed frontier arm — [acknowledged; future-work: closed-model arm when access/budget allows]
+- H4 pair limited to one family (deepseek-v4-flash think/nothink) — [mitigated-by: same-weights toggle is the cleanest isolation; acknowledged for generality]
+- MSA only; dialects excluded by design — [mitigated-by: reserved for canonical M5 with its own EN-anchored design]
+- single run per arm at temperature 0 — [mitigated-by: set-level bootstrap CIs; future-work: repeat-run stability (TelcoAgent-style BRS import)]
+- AST-style strict scoring bounds (ordered calls, exact enums) — [acknowledged; M6 order/extra-call question explicitly reserved as scorer iteration 2]
+- alias contract coverage defines M4 correctness (ruling: consonant skeleton + vowel classes) — [mitigated-by: consistent_but_unlisted reported separately; acknowledged]
+- canned tool outputs, no executable backends; max 4 tool rounds — [acknowledged; mitigated-by: English canned outputs mirror the M6 deployment condition (D18)]
+- human audit pending — DC3 gate (≥95% agreement, 50 items, 2 annotators) not yet evaluated — [acknowledged; kit shipped, sheets out]
+- chat-surface probe not yet run (API-only evidence) — [future-work]
+- Hijri tasks span one year window (1448 AH) — [acknowledged; future-work: multi-year + month-boundary stress set]
+- forensic classes assigned by deterministic heuristics on date args — [mitigated-by: verbatim examples printed for inspection; acknowledged]
+- M1 (bidi/RTL) infra-confound noted in Phase 0; not in pilot — [acknowledged; future-work with serializer logging]
+- P1/P3 and taxonomy-line sources carded from Phase-0 scan, not re-read in-repo — [mitigated-by: DC1 re-scan checklist before submission]
