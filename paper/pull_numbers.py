@@ -161,6 +161,13 @@ def build():
     return out
 
 
+DISPLAY = {"frontier-gemini": "gemini-3.5-flash-lite (closed)"}
+
+
+def disp(arm):
+    return DISPLAY.get(arm, arm)
+
+
 def to_markdown(out):
     arms = list(out["fingerprints"].keys())
     mechs = [m for m in MECHS if any(m in out["fingerprints"][a] for a in arms)]
@@ -173,23 +180,23 @@ def to_markdown(out):
     for arm in arms:
         f = out["fingerprints"][arm]
         cells = [f"{f[m]['strict']:.2f}" if m in f else "—" for m in mechs]
-        lines.append(f"| {arm} | " + " | ".join(cells) + " |")
+        lines.append(f"| {disp(arm)} | " + " | ".join(cells) + " |")
     lines += ["", "## Headline deltas (95% bootstrap CI over sets) + exact sign test (Holm)", ""]
     for arm in arms:
         for name, d in out["deltas"][arm].items():
             st = out["stats"].get(arm, {}).get(name, {})
             p_txt = (f" | p_exact={st['p_exact']:.4f}, p_holm={st['p_holm']:.4f}"
                      f"{' *' if st.get('significant_holm_05') else ''}") if st else ""
-            lines.append(f"- {arm} **{name}** = {d['delta']:.3f} "
+            lines.append(f"- {disp(arm)} **{name}** = {d['delta']:.3f} "
                          f"[{d['ci95'][0]:.3f}, {d['ci95'][1]:.3f}] (n={d['n_sets']})"
                          f"{p_txt}")
     lines += ["", "## Aggregate anchor-vs-Arabic gaps", ""]
     for arm, g in out["aggregate_gaps"].items():
-        lines.append(f"- {arm}: anchor {g['anchor_mean']:.3f} - arabic "
+        lines.append(f"- {disp(arm)}: anchor {g['anchor_mean']:.3f} - arabic "
                      f"{g['arabic_mean']:.3f} = gap {g['gap']:.3f}")
     lines += ["", "## Hijri forensics (counts per class; pilot arms)", ""]
     for arm, row in out["forensics"].items():
-        lines.append(f"- {arm}: {row}")
+        lines.append(f"- {disp(arm)}: {row}")
     lines += ["", "## Adapter effect", "",
               f"- {out['adapter_effect']['per_mechanism']} | confound: "
               f"{out['adapter_effect']['ADAPTER_CONFOUND']}"]
@@ -198,7 +205,7 @@ def to_markdown(out):
               f"- H4 think-minus-nothink strict: "
               f"{ {k: round(v, 3) for k, v in out['criteria']['h4_think_minus_nothink_strict'].items()} }"]
     for arm, h in out["criteria"]["h2_isolated_delta_M2_vs_aggregate_gap"].items():
-        lines.append(f"- H2 [{arm}]: Delta_M2_hijri {h['Delta_M2_hijri']:.3f} vs "
+        lines.append(f"- H2 [{disp(arm)}]: Delta_M2_hijri {h['Delta_M2_hijri']:.3f} vs "
                      f"aggregate gap {h['aggregate_gap']:.3f}")
     return "\n".join(lines) + "\n"
 

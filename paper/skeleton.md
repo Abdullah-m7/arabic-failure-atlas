@@ -37,7 +37,8 @@
 
 ## 5. Experimental setup [STUB]
 - 4 arms on Ollama Cloud: gpt-oss-20b; deepseek-v4-flash think/nothink (H4
-  same-weights toggle, native endpoint — /v1 ignores `think`); qwen3.5:397b.
+  same-weights toggle, native endpoint — /v1 ignores `think`); qwen3.5:397b;
+  closed-weight arm: gemini-3.5-flash-lite (lite tier, free quota — see appendix ladder).
 - temperature 0, transport-only retries, full transcripts, seeded bootstrap.
 - Adapter-effect check: {adapter_effect.per_mechanism} -> no confound.
 
@@ -47,6 +48,11 @@
 - Aggregate anchor-vs-AR gaps: {aggregate_gaps.*}
 - Paired exact sign tests (McNemar on discordant sets) with Holm correction
   across the delta x arm family: {stats.*}
+- TABLE-R2 [stats table]: rows = delta x arm, cols = n_sets, n01, n10,
+  p_exact, p_holm, sig — rendered verbatim from {stats.*.*.p_holm} and
+  siblings; no retyping.
+- [RESEARCH-LEAD SENTENCE SLOT — universality framing across the five arms,
+  incl. the closed-weight lite-tier arm; one sentence, cite TABLE-R2.]
 - M3 numeral control: {deltas.*.Delta_M3_numerals}
 - Pre-registered criteria: discrimination {criteria.discrimination_spread_points},
   H2 share {criteria.h2_isolated_delta_M2_vs_aggregate_gap}, H4 direction {criteria.h4_think_minus_nothink_strict}.

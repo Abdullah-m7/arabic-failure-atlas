@@ -2,7 +2,7 @@
 
 - n=10 matched sets per mechanism (pilot scale) — [acknowledged; future-work: Phase-2 scale-up + held-out split]
 - single provider (Ollama Cloud), single quota pool — [mitigated-by: adapter-effect check Δ≤0.05; future-work: second provider replication]
-- 4 open-weight arms; no closed frontier arm — [acknowledged; future-work: closed-model arm when access/budget allows]
+- Closed-weight arm is a lite-tier model of a current generation (gemini-3.5-flash-lite), reached via free tier; flagship-tier closed models untested — explicit future work. — [acknowledged]
 - H4 pair limited to one family (deepseek-v4-flash think/nothink) — [mitigated-by: same-weights toggle is the cleanest isolation; acknowledged for generality]
 - MSA only; dialects excluded by design — [mitigated-by: reserved for canonical M5 with its own EN-anchored design]
 - single run per arm at temperature 0 — [mitigated-by: set-level bootstrap CIs; future-work: repeat-run stability (TelcoAgent-style BRS import)]

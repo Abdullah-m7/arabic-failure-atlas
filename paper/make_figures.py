@@ -25,13 +25,13 @@ ARM_LABELS = {
     "deepseek-v4-flash-think": "deepseek-v4\n(think)",
     "deepseek-v4-flash-nothink": "deepseek-v4\n(no-think)",
     "qwen3.5-397b": "qwen3.5-397b",
-    "frontier-gemini": "gemini-3.5-flash-lite\n(frontier)",
+    "frontier-gemini": "gemini-3.5-flash-lite\n(closed)",
 }
 ARM_LABELS = {a: ARM_LABELS.get(a, a) for a in ARMS}
 
 
 def edge(arm):
-    """Frontier arm highlighted with a heavy black edge + hatch."""
+    """Closed-weight arm highlighted with a heavy black edge + hatch."""
     return dict(edgecolor="black", linewidth=1.6, hatch="//") if arm == FRONTIER else {}
 # Okabe-Ito colorblind-safe palette
 C = {"blue": "#0072B2", "orange": "#E69F00", "green": "#009E73",
@@ -82,7 +82,7 @@ def f1_fingerprints():
     ax.set_xticklabels([ARM_LABELS[a] for a in ARMS], fontsize=8)
     ax.set_ylabel("strict score")
     ax.set_title("F1 — Failure fingerprint: strict score by mechanism and arm "
-                 f"({get('scorer_state')}; hatched = frontier arm)", fontsize=9)
+                 f"({get('scorer_state')}; hatched = closed-weight arm)", fontsize=9)
     ax.legend(frameon=False, ncol=len(MECHS), fontsize=8)
     style(ax)
     save(fig, "F1_fingerprints")
