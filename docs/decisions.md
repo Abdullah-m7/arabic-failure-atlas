@@ -230,3 +230,20 @@ free-tier-viable choice — pro previews carry minimal free RPD). `gemini-pro-la
 alias rejected because the resolved concrete id would be undocumented. Free-tier
 discipline: 2s inter-call delay, 4 transport retries with 15/30/60/120s backoff;
 partial results are data; --resume covers a daily-quota wall.
+
+**D28 — 2026-08-03 — Frontier model corrected to gemini-2.5-flash after a hard
+free-tier wall on the first pick.** gemini-3.6-flash's free tier turned out to
+be capped at 20 requests (429 body: "generate_content_free_tier_requests,
+limit: 20, model: gemini-3.6-flash") — completing 107 tasks (~220 requests) on
+it is infeasible without billing; 10 tasks completed before the wall and are
+QUARANTINED in results/raw/<frontier-ts>/EXCLUDED-gemini-3.6-flash-partial.jsonl
+(kept as raw record, excluded from all analysis — arms are single-model).
+Gemini quotas are per-model, so the frontier arm steps down an empirical
+ladder of stable models, quarantining each partial: (1) gemini-2.5-flash —
+404, closed to new accounts; (2) gemini-3.5-flash — walled like 3.6 (11 tasks
+then frozen; partial quarantined as EXCLUDED-gemini-3.5-flash-partial.jsonl);
+(3) gemini-3.5-flash-lite — the lite tier carries the workable free quota;
+fresh full 107-task run at 8s pacing, same retry/backoff ladder. "Frontier"
+is therefore read as "newest stable Gemini generation reachable on free tier",
+and the paper labels the arm gemini-3.5-flash-lite explicitly. Also this pass: --resume now drops transport-error records so they
+re-run (model-output errors remain data).

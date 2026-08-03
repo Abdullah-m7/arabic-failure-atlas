@@ -25,7 +25,7 @@ ARM_LABELS = {
     "deepseek-v4-flash-think": "deepseek-v4\n(think)",
     "deepseek-v4-flash-nothink": "deepseek-v4\n(no-think)",
     "qwen3.5-397b": "qwen3.5-397b",
-    "frontier-gemini": "gemini-3.6\n(frontier)",
+    "frontier-gemini": "gemini-3.5-flash-lite\n(frontier)",
 }
 ARM_LABELS = {a: ARM_LABELS.get(a, a) for a in ARMS}
 

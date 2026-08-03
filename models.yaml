@@ -48,9 +48,9 @@ models:
     adapter: openai_compatible
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/
     api_key_env: GEMINI_API_KEY
-    model: gemini-3.6-flash
+    model: gemini-3.5-flash-lite       # D28 ladder: 3.6 and 3.5 walled ~20 req; lite tier carries the workable free quota
     invocation_style: native
-    inter_call_delay_s: 2
+    inter_call_delay_s: 8
     timeout_s: 180
     transport_retries: 4
     transport_backoff_s: [15, 30, 60, 120]
