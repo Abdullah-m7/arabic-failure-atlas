@@ -1,0 +1,21 @@
+{
+  "ts_native": "20260803T101427Z",
+  "per_mechanism": {
+    "M2": {
+      "v1": 0.633,
+      "native": 0.633,
+      "delta": 0.0
+    },
+    "M4": {
+      "v1": 0.6,
+      "native": 0.6,
+      "delta": 0.0
+    },
+    "M6": {
+      "v1": 0.6,
+      "native": 0.55,
+      "delta": -0.05
+    }
+  },
+  "ADAPTER_CONFOUND": false
+}
