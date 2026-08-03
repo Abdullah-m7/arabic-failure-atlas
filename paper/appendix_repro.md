@@ -1,5 +1,7 @@
 # Appendix — Reproducibility
 
+Project codename: Arabic Failure Atlas; paper title: The Calendar Gap.
+
 Machine-assembled from results/raw-meta/, results/summaries/, models.yaml, and
 docs/decisions.md. Regenerate numbers with `python3 paper/pull_numbers.py`.
 

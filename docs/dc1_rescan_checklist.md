@@ -37,6 +37,7 @@ TODO-verify completions (refs.bib):
 - [ ] agenthallu — locate identifier, or drop citation
 - [ ] aegis2025 (2508.19504) — title + authors
 - [ ] agentatlas2026 (2605.20530) — title + authors
+- [ ] arabicdemographics — standard source for the 400M Arabic-speakers figure (E7)
 
 ## Venues to scan by listing (since 2026-08)
 
