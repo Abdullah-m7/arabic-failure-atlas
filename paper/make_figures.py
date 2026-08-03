@@ -19,17 +19,26 @@ FIG = REPO / "paper" / "figures"
 N = json.loads((REPO / "paper" / "numbers.json").read_text(encoding="utf-8"))
 
 ARMS = list(N["fingerprints"].keys())
+FRONTIER = "frontier-gemini"
 ARM_LABELS = {
     "gpt-oss-20b": "gpt-oss-20b",
     "deepseek-v4-flash-think": "deepseek-v4\n(think)",
     "deepseek-v4-flash-nothink": "deepseek-v4\n(no-think)",
     "qwen3.5-397b": "qwen3.5-397b",
+    "frontier-gemini": "gemini-3.6\n(frontier)",
 }
+ARM_LABELS = {a: ARM_LABELS.get(a, a) for a in ARMS}
+
+
+def edge(arm):
+    """Frontier arm highlighted with a heavy black edge + hatch."""
+    return dict(edgecolor="black", linewidth=1.6, hatch="//") if arm == FRONTIER else {}
 # Okabe-Ito colorblind-safe palette
 C = {"blue": "#0072B2", "orange": "#E69F00", "green": "#009E73",
      "vermil": "#D55E00", "purple": "#CC79A7", "sky": "#56B4E9",
      "yellow": "#F0E442", "black": "#000000"}
-MECHS = ["M2", "M4", "M6"]
+MECHS = [m for m in ("M2", "M3", "M4", "M6")
+         if any(m in N["fingerprints"][a] for a in ARMS)]
 
 
 def get(*path):
@@ -57,21 +66,24 @@ def save(fig, name):
 
 
 def f1_fingerprints():
-    fig, ax = plt.subplots(figsize=(7, 3.4))
-    w = 0.24
-    colors = [C["blue"], C["orange"], C["green"]]
+    fig, ax = plt.subplots(figsize=(8.5, 3.4))
+    w = 0.8 / len(MECHS)
+    colors = [C["blue"], C["yellow"], C["orange"], C["green"]]
     for j, mech in enumerate(MECHS):
-        xs = [i + (j - 1) * w for i in range(len(ARMS))]
-        ys = [get("fingerprints", arm, mech, "strict") for arm in ARMS]
-        ax.bar(xs, ys, width=w, label=mech, color=colors[j])
-        for x, y in zip(xs, ys):
-            ax.text(x, y + 0.02, f"{y:.2f}", ha="center", fontsize=7)
+        for i, arm in enumerate(ARMS):
+            if mech not in N["fingerprints"][arm]:
+                continue
+            x = i + (j - (len(MECHS) - 1) / 2) * w
+            y = get("fingerprints", arm, mech, "strict")
+            ax.bar(x, y, width=w, color=colors[j % len(colors)],
+                   label=mech if i == 0 else None, **edge(arm))
+            ax.text(x, y + 0.02, f"{y:.2f}", ha="center", fontsize=6.5)
     ax.set_xticks(range(len(ARMS)))
     ax.set_xticklabels([ARM_LABELS[a] for a in ARMS], fontsize=8)
     ax.set_ylabel("strict score")
     ax.set_title("F1 — Failure fingerprint: strict score by mechanism and arm "
-                 f"(run {get('run_ts')}, {get('scorer_state')})", fontsize=9)
-    ax.legend(frameon=False, ncol=3, fontsize=8)
+                 f"({get('scorer_state')}; hatched = frontier arm)", fontsize=9)
+    ax.legend(frameon=False, ncol=len(MECHS), fontsize=8)
     style(ax)
     save(fig, "F1_fingerprints")
 
@@ -84,9 +96,9 @@ def f2_hijri_money():
         h = get("fingerprints", arm, "M2", "by_variant", "hijri_ar")
         d = get("deltas", arm, "Delta_M2_hijri")
         ax.bar(i - w / 2, g, width=w, color=C["blue"],
-               label="greg_ar" if i == 0 else None)
+               label="greg_ar" if i == 0 else None, **edge(arm))
         ax.bar(i + w / 2, h, width=w, color=C["vermil"],
-               label="hijri_ar" if i == 0 else None)
+               label="hijri_ar" if i == 0 else None, **edge(arm))
         ax.text(i - w / 2, g + 0.02, f"{g:.2f}", ha="center", fontsize=8)
         ax.text(i + w / 2, h + 0.02, f"{h:.2f}", ha="center", fontsize=8)
         ax.text(i, 1.13,
@@ -106,18 +118,19 @@ def f2_hijri_money():
 def f3_forensics():
     classes = ["NO_CONVERSION", "NEAR_MISS", "GROSS_ERROR", "FORMAT_FIELD", "CLARIFY"]
     colors = [C["black"], C["sky"], C["vermil"], C["yellow"], C["purple"]]
+    arms = list(N["forensics"].keys())  # forensics cover the pilot arms only
     fig, ax = plt.subplots(figsize=(7, 3.6))
-    bottoms = [0.0] * len(ARMS)
+    bottoms = [0.0] * len(arms)
     for cls, col in zip(classes, colors):
-        ys = [get("forensics", arm, cls) for arm in ARMS]
-        ax.bar(range(len(ARMS)), ys, bottom=bottoms, color=col, label=cls, width=0.55)
+        ys = [get("forensics", arm, cls) for arm in arms]
+        ax.bar(range(len(arms)), ys, bottom=bottoms, color=col, label=cls, width=0.55)
         bottoms = [b + y for b, y in zip(bottoms, ys)]
-    for i, arm in enumerate(ARMS):
+    for i, arm in enumerate(arms):
         md = get("forensics", arm, "mean_err_days")
         ax.text(i, bottoms[i] + 0.25, f"mean |err| = {md:.1f} d",
                 ha="center", fontsize=8)
-    ax.set_xticks(range(len(ARMS)))
-    ax.set_xticklabels([ARM_LABELS[a] for a in ARMS], fontsize=8)
+    ax.set_xticks(range(len(arms)))
+    ax.set_xticklabels([ARM_LABELS.get(a, a) for a in arms], fontsize=8)
     ax.set_ylabel("failed hijri_ar records (of 10)")
     ax.set_title("F3 — Hijri forensics: failure classes per arm "
                  "(+ mean |error-days| over dated misses)", fontsize=9)
@@ -145,12 +158,44 @@ def f4_h4():
     save(fig, "F4_h4_reasoning_toggle")
 
 
+def f5_m3_panel():
+    arms = [a for a in ARMS if "M3" in N["fingerprints"][a]]
+    if not arms:
+        print("F5 skipped: no M3 data yet")
+        return
+    fig, ax = plt.subplots(figsize=(8, 3.6))
+    w = 0.36
+    for i, arm in enumerate(arms):
+        west = get("fingerprints", arm, "M3", "by_variant", "west_ar")
+        east = get("fingerprints", arm, "M3", "by_variant", "east_ar")
+        d = get("deltas", arm, "Delta_M3_numerals")
+        ax.bar(i - w / 2, west, width=w, color=C["blue"],
+               label="west_ar (ASCII digits)" if i == 0 else None, **edge(arm))
+        ax.bar(i + w / 2, east, width=w, color=C["orange"],
+               label="east_ar (٠-٩ digits)" if i == 0 else None, **edge(arm))
+        ax.text(i - w / 2, west + 0.02, f"{west:.2f}", ha="center", fontsize=8)
+        ax.text(i + w / 2, east + 0.02, f"{east:.2f}", ha="center", fontsize=8)
+        ax.text(i, 1.13,
+                f"Δ={d['delta']:.2f}\n[{d['ci95'][0]:.2f}, {d['ci95'][1]:.2f}]",
+                ha="center", fontsize=7.5)
+    ax.set_xticks(range(len(arms)))
+    ax.set_xticklabels([ARM_LABELS.get(a, a) for a in arms], fontsize=8)
+    ax.set_ylabel("strict score")
+    ax.set_title("F5 — M3 numeral control: same Arabic task, digits toggled "
+                 "(Δ with 95% bootstrap CI over 9 sets)", fontsize=9)
+    ax.legend(frameon=False, fontsize=8, loc="center right")
+    style(ax, ylim=(0, 1.3))
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    save(fig, "F5_m3_numerals")
+
+
 def main():
     FIG.mkdir(exist_ok=True)
     f1_fingerprints()
     f2_hijri_money()
     f3_forensics()
     f4_h4()
+    f5_m3_panel()
 
 
 if __name__ == "__main__":

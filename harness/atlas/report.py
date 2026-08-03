@@ -27,6 +27,7 @@ DELTAS = {
     "Delta_M2_lang": ("M2", "greg_en", "greg_ar"),
     "Delta_M4_crosscall": ("M4", "en_anchor", "cross_call_ar"),
     "Delta_M6_discipline": ("M6", "en_user_en_tools", "ar_user_en_tools"),
+    "Delta_M3_numerals": ("M3", "west_ar", "east_ar"),
 }
 
 

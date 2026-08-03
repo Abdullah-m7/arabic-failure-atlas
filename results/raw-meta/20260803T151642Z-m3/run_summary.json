@@ -1,0 +1,9 @@
+[
+  {
+    "model": "qwen3.5-397b",
+    "ok": 27,
+    "output_errors": 0,
+    "transport_failures": 0,
+    "path": "../results/raw/20260803T151642Z-m3/qwen3.5-397b.jsonl"
+  }
+]

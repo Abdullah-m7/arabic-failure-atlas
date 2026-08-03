@@ -220,3 +220,13 @@ annotator message). Stale pre-ruling audit/ dir removed.
 numbers.json path) + paper/pull_numbers.py which RECOMPUTES fingerprints/deltas
 from raw + frozen tasks through the harness's own scoring code — no retyped
 numbers anywhere in the paper pipeline.
+
+**D27 — 2026-08-03 — Frontier arm model choice: gemini-3.6-flash.** Catalog listed
+live from the OpenAI-compat models endpoint (59 entries; auth verified, key held
+only in gitignored .env). The gen-3+ pro line exists only as previews
+(gemini-3-pro-preview, gemini-3.1-pro-preview) which fail the "current stable"
+requirement; the newest STABLE text model is gemini-3.6-flash (also the
+free-tier-viable choice — pro previews carry minimal free RPD). `gemini-pro-latest`
+alias rejected because the resolved concrete id would be undocumented. Free-tier
+discipline: 2s inter-call delay, 4 transport retries with 15/30/60/120s backoff;
+partial results are data; --resume covers a daily-quota wall.

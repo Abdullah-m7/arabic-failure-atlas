@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 
 import requests
 
@@ -44,8 +45,12 @@ class OpenAICompatibleAdapter(Adapter):
         # Per-model extra request params merged verbatim into every request body
         # (e.g. Ollama's think: true/false, reasoning effort). See decisions D20.
         self.extra_body = dict(config.get("extra_body") or {})
+        # Free-tier pacing: sleep before every request (seconds).
+        self.inter_call_delay_s = config.get("inter_call_delay_s", 0)
 
     def _post(self, payload: dict) -> dict:
+        if self.inter_call_delay_s:
+            time.sleep(self.inter_call_delay_s)
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

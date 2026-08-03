@@ -43,3 +43,14 @@ models:
   # - name: fixtures-smoke
   #   adapter: fixtures
   #   fixtures_path: harness/tests/fixtures/model_outputs_pass.jsonl
+
+  - name: frontier-gemini                # frontier arm (free tier; D27)
+    adapter: openai_compatible
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    api_key_env: GEMINI_API_KEY
+    model: gemini-3.6-flash
+    invocation_style: native
+    inter_call_delay_s: 2
+    timeout_s: 180
+    transport_retries: 4
+    transport_backoff_s: [15, 30, 60, 120]

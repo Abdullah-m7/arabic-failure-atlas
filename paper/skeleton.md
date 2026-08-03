@@ -45,6 +45,9 @@
 - Fingerprint table per arm: {fingerprints.*}
 - Headline deltas + CIs: {deltas.*}
 - Aggregate anchor-vs-AR gaps: {aggregate_gaps.*}
+- Paired exact sign tests (McNemar on discordant sets) with Holm correction
+  across the delta x arm family: {stats.*}
+- M3 numeral control: {deltas.*.Delta_M3_numerals}
 - Pre-registered criteria: discrimination {criteria.discrimination_spread_points},
   H2 share {criteria.h2_isolated_delta_M2_vs_aggregate_gap}, H4 direction {criteria.h4_think_minus_nothink_strict}.
 
