@@ -12,20 +12,16 @@
 
 models:
   - name: deepseek-v4-flash-think        # H4 arm 1: reasoning ON
-    adapter: openai_compatible
-    base_url: https://ollama.com/v1
+    adapter: ollama_native               # /v1 ignores `think`; native honors it (D23)
     api_key_env: OLLAMA_API_KEY
     model: deepseek-v4-flash
-    invocation_style: native
     extra_body:
       think: true
 
   - name: deepseek-v4-flash-nothink      # H4 arm 2: SAME model id, reasoning OFF
-    adapter: openai_compatible
-    base_url: https://ollama.com/v1
+    adapter: ollama_native               # /v1 ignores `think`; native honors it (D23)
     api_key_env: OLLAMA_API_KEY
     model: deepseek-v4-flash
-    invocation_style: native
     extra_body:
       think: false
 

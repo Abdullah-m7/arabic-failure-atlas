@@ -141,6 +141,16 @@ ASCII digit verbatim per the non-toggled-args rule.
 (h) tests/test_pipeline_fixtures.py now runs against a seed-only task dir
 (fixture model outputs cover the 3 seed sets; the pool is 80 tasks).
 
+**D23 — 2026-08-03 — Probe verdict: /v1 ignores `think`; H4 arms routed through
+new `ollama_native` adapter.** Post-reset probes: all 4 roster models 200 +
+correct tool calls. deepseek-v4-flash via /v1 kept thinking with think=false;
+via native /api/chat the toggle behaves (thinking_present true→false). Per the
+runbook's pre-planned fallback, arms A/B now use `adapter: ollama_native`
+(native /api/chat, `think` at body root, temperature via options, canned tool
+results as role:"tool" messages); C and D stay on openai_compatible /v1. C and
+D emit reasoning traces by default (thinking_present=true in probes) — accepted
+as "provider defaults"; the H4 contrast lives entirely in the A/B pair.
+
 **D20 — 2026-08-02 — Provider switch to Ollama Cloud Pro; per-model `extra_body`
 pass-through added to openai_compatible.** Model configs may now carry
 `extra_body: {...}` merged verbatim into every request body (native and

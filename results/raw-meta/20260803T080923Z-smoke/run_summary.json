@@ -1,0 +1,9 @@
+[
+  {
+    "model": "gpt-oss-20b",
+    "ok": 8,
+    "output_errors": 0,
+    "transport_failures": 0,
+    "path": "../results/raw/20260803T080923Z-smoke/gpt-oss-20b.jsonl"
+  }
+]
