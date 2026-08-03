@@ -69,15 +69,27 @@ def redact(config: dict) -> dict:
     return {k: v for k, v in config.items() if "key" not in k.lower() or k.endswith("_env")}
 
 
-def run_model(model_cfg: dict, tasks: list[dict], out_dir: Path, stamp: dict) -> dict:
+def run_model(model_cfg: dict, tasks: list[dict], out_dir: Path, stamp: dict,
+              resume: bool = False) -> dict:
     name = model_cfg["name"]
     adapter_cls = ADAPTERS[model_cfg["adapter"]]
     adapter = adapter_cls(model_cfg)
     out_path = out_dir / f"{name}.jsonl"
     n_ok = n_output_err = n_transport_fail = 0
 
-    with out_path.open("w", encoding="utf-8") as fh:
+    done: set[str] = set()
+    if resume and out_path.exists():
+        with out_path.open(encoding="utf-8") as fh:
+            for line in fh:
+                if line.strip():
+                    done.add(json.loads(line)["task_id"])
+        print(f"   resume: {len(done)} tasks already recorded, skipping them", flush=True)
+
+    mode = "a" if (resume and done) else "w"
+    with out_path.open(mode, encoding="utf-8") as fh:
         for task in tasks:
+            if task["task_id"] in done:
+                continue
             record = {
                 "task_id": task["task_id"],
                 "set_id": task["set_id"],
@@ -119,6 +131,9 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--seed", type=int, default=1234)
     ap.add_argument("--only-model", help="run only the named model")
+    ap.add_argument("--resume", action="store_true",
+                    help="skip tasks already recorded in the model's output file "
+                         "(append mode) — for continuing an interrupted run")
     args = ap.parse_args(argv)
 
     load_dotenv(REPO_ROOT / ".env")
@@ -152,7 +167,7 @@ def main(argv=None) -> int:
     summaries = []
     for model_cfg in models:
         print(f"== running {model_cfg['name']} on {len(tasks)} tasks", flush=True)
-        summaries.append(run_model(model_cfg, tasks, args.out, stamp))
+        summaries.append(run_model(model_cfg, tasks, args.out, stamp, resume=args.resume))
         print(f"   {summaries[-1]}", flush=True)
 
     (args.out / "run_summary.json").write_text(
