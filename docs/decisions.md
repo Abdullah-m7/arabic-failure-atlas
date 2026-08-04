@@ -247,3 +247,15 @@ fresh full 107-task run at 8s pacing, same retry/backoff ladder. "Frontier"
 is therefore read as "newest stable Gemini generation reachable on free tier",
 and the paper labels the arm gemini-3.5-flash-lite explicitly. Also this pass: --resume now drops transport-error records so they
 re-run (model-output errors remain data).
+
+**D29 — 2026-08-04 — Pre-unseal adjudication rule (verbatim as issued):**
+"D29 (pre-unseal): With two annotators, the DC3 gate is computed on the
+HUMAN-CONSENSUS records only (both annotators agree). Rationale: scorer
+validation requires ground truth; records where trained humans disagree
+carry none, and >=95% against BOTH annotators is arithmetically
+unreachable at the observed 86% inter-annotator agreement. Full
+transparency mandated: scorer-vs-A, scorer-vs-B, all kappas, and a
+per-record anatomy of every disagreement are reported alongside the gate.
+Declared after seeing A/B verdicts, BEFORE unsealing scorer verdicts —
+git order is the witness. Scorer iteration 2 remains reserved regardless
+of outcome."
