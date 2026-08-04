@@ -25,12 +25,13 @@ def failure_reasons(scored):
     reasons = []
     ast = scored["components"]["ast"]
     lang = scored["components"]["lang"]
-    if not ast["count_match"]:
-        reasons.append("wrong_call_count")
-    elif not ast["name_match"]:
-        reasons.append("wrong_function")
-    elif not ast["args_match"]:
-        reasons.append("wrong_args")
+    if not ast["pass"]:
+        if not ast.get("required_matched", ast["name_match"]):
+            reasons.append("missing_or_wrong_required_call")
+        if not ast.get("extras_benign", True):
+            reasons.append("wrong_extra_call")
+        if not reasons:
+            reasons.append("wrong_args")
     if not lang["args_schema_ok"]:
         reasons.append("enum_or_type_violation")
     if not lang["answer_lang_ok"]:

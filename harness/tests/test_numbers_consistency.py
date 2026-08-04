@@ -61,14 +61,16 @@ def test_audit_block_matches_dc3_compute_and_no_pending_markers():
         "dc3_compute", REPO / "scripts" / "dc3_compute.py")
     dc3 = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(dc3)
-    r = dc3.compute()
+    r = dc3.compute_v2()
 
     numbers = json.loads((REPO / "paper" / "numbers.json").read_text(encoding="utf-8"))
     au = numbers["audit"]
-    for key in ("human_kappa", "consensus_n", "gate_agreement", "gate_kappa",
-                "scorer_vs_A", "scorer_vs_B", "dc3_verdict"):
+    for key in ("human_kappa", "consensus_n", "gate_v1", "gate_v2",
+                "gate_agreement", "gate_kappa", "scorer_vs_A", "scorer_vs_B",
+                "dc3_verdict"):
         assert au[key] == r[key], f"audit.{key} diverged from dc3_compute"
     assert au["dc3_verdict"] in ("PASS", "FAIL")
+    assert au["gate_agreement"] == au["gate_v2"]
     assert 0.0 <= au["gate_agreement"] <= 1.0 and au["consensus_n"] <= 50
 
     skeleton = (REPO / "paper" / "skeleton.md").read_text(encoding="utf-8")
