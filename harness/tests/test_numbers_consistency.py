@@ -51,3 +51,25 @@ def test_all_skeleton_placeholders_resolve():
         if not _resolve(numbers, path.split(".")):
             failures.append(path)
     assert not failures, f"unresolvable skeleton placeholders: {failures}"
+
+
+def test_audit_block_matches_dc3_compute_and_no_pending_markers():
+    """numbers.json's audit block must equal a fresh dc3_compute.compute()
+    (same arithmetic, no retyping), and no [pending: DC3] marker may remain
+    in the skeleton now that DC3 is adjudicated (D29)."""
+    spec = importlib.util.spec_from_file_location(
+        "dc3_compute", REPO / "scripts" / "dc3_compute.py")
+    dc3 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dc3)
+    r = dc3.compute()
+
+    numbers = json.loads((REPO / "paper" / "numbers.json").read_text(encoding="utf-8"))
+    au = numbers["audit"]
+    for key in ("human_kappa", "consensus_n", "gate_agreement", "gate_kappa",
+                "scorer_vs_A", "scorer_vs_B", "dc3_verdict"):
+        assert au[key] == r[key], f"audit.{key} diverged from dc3_compute"
+    assert au["dc3_verdict"] in ("PASS", "FAIL")
+    assert 0.0 <= au["gate_agreement"] <= 1.0 and au["consensus_n"] <= 50
+
+    skeleton = (REPO / "paper" / "skeleton.md").read_text(encoding="utf-8")
+    assert "[pending: DC3]" not in skeleton

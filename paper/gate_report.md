@@ -8,28 +8,27 @@
 | SCI-2 | FAIL | 1 |
 | SCI-3 | PASS | 0 |
 | SCI-4 | PASS | 0 |
-| SCI-5 | FAIL | 13 |
+| SCI-5 | FAIL | 11 |
 | SCI-6 | FAIL | 9 |
 | SCI-7 | FAIL | 10 |
-| STY-1 | FAIL | 19.4 |
+| STY-1 | FAIL | 19.8 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 1 |
 | STY-4 | PASS | 0 |
 | STY-5 | PASS | 0 |
 
 ## SCI-1
-- L78: 95
-- L87: 5
-- L101: 5
-- L107: 400
-- L111: 0.33
+- L80: 95
+- L91: 5
+- L105: 5
+- L111: 400
+- L115: 0.33
 
 ## SCI-2
 - delta sentence without bracketed CI: The embedded canary string enables   post-release leak detection in model output
 
 ## SCI-5
 - refs.bib TODO-verify entries: 11
-- [pending: DC3] placeholders: 2
 
 ## SCI-6
 - Closed-weight arm is a lite-tier model of a current generation (gemini
@@ -46,8 +45,8 @@
 - UNVERIFIED ledger rows: 10
 
 ## STY-1
-- em-dash/1000w = 19.4 (max 5)
-- semicolon/1000w = 27.4 (max 4)
+- em-dash/1000w = 19.8 (max 5)
+- semicolon/1000w = 28.7 (max 4)
 
 ## STY-3
 - inversion-family matches: 1 (max 3)

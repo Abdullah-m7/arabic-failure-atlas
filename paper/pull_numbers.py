@@ -197,6 +197,24 @@ def build():
             and mech in out["fingerprints"]["deepseek-v4-flash-nothink"]
         },
     }
+
+    # DC3 audit block — identical arithmetic to audit/DC3_REPORT.md: derived
+    # from scripts/dc3_compute.compute(), not retyped.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "dc3_compute", REPO / "scripts" / "dc3_compute.py")
+    dc3 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(dc3)
+    r = dc3.compute()
+    out["audit"] = {
+        "human_kappa": r["human_kappa"],
+        "consensus_n": r["consensus_n"],
+        "gate_agreement": r["gate_agreement"],
+        "gate_kappa": r["gate_kappa"],
+        "scorer_vs_A": r["scorer_vs_A"],
+        "scorer_vs_B": r["scorer_vs_B"],
+        "dc3_verdict": r["dc3_verdict"],
+    }
     return out
 
 
@@ -246,6 +264,17 @@ def to_markdown(out):
     for arm, h in out["criteria"]["h2_isolated_delta_M2_vs_aggregate_gap"].items():
         lines.append(f"- H2 [{disp(arm)}]: Delta_M2_hijri {h['Delta_M2_hijri']:.3f} vs "
                      f"aggregate gap {h['aggregate_gap']:.3f}")
+    au = out["audit"]
+    lines += ["", "## DC3 audit (per D29 — gate on human-consensus records; "
+              "full anatomy in audit/DC3_REPORT.md)", "",
+              f"- inter-annotator kappa: {au['human_kappa']} | consensus n: "
+              f"{au['consensus_n']}",
+              f"- gate agreement: {au['gate_agreement']} (kappa "
+              f"{au['gate_kappa']}) -> DC3 VERDICT: {au['dc3_verdict']}",
+              f"- scorer vs A: {au['scorer_vs_A']['agreement']:.2f} (kappa "
+              f"{au['scorer_vs_A']['kappa']}) | scorer vs B: "
+              f"{au['scorer_vs_B']['agreement']:.2f} (kappa "
+              f"{au['scorer_vs_B']['kappa']})"]
     return "\n".join(lines) + "\n"
 
 
