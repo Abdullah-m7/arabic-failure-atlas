@@ -936,6 +936,8 @@
     }
   },
   "audit": {
+    "n": 50,
+    "gate_threshold": 0.95,
     "human_kappa": 0.7117,
     "consensus_n": 43,
     "gate_v1": 0.8837,

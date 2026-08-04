@@ -85,3 +85,20 @@ single-model) for transparency:
   where asymptotic chi-square would be invalid), Holm-Bonferroni adjusted
   across the full delta x arm family. Implementation: harness/atlas/stats.py
   (stdlib-only, deterministic; unit-tested against hand-computed values).
+
+## Scorer-iteration timeline (audit adjudication)
+
+Every state below is a pushed commit on `main`; scorer verdicts at each
+gate are re-derivable offline from raw + the code at that commit.
+
+| step | state | commit |
+|---|---|---|
+| scorer-freeze-v1 | frozen after alias iteration 1 of 2 (tag scorer-freeze-v1) | `c274542` |
+| audit kit out | blind 50-record sample sealed; fillable A/B sheets delivered | `d70a4c4` |
+| D29 declared | consensus-gate adjudication rule committed BEFORE unsealing (git order is the witness) | `c86f763` |
+| gate v1 | returns ingested, verdicts unsealed: 0.8837 on n=43 consensus -> FAIL | `7437113` |
+| D30 declared | iteration-2 constraint families + no-third-iteration fallback, committed BEFORE any amendment code | `3a06ecf` |
+| iteration 2 + gate v2 (FINAL) | D31 amendments (M6 call-set semantics only), scorer-freeze-v2, re-gate: 0.9070 -> FAIL, published as prominent limitation | `5e0e140` |
+
+Verification: `python3 scripts/dc3_compute.py` rebuilds both reports;
+`git log --format=%h --grep=D29` etc. recover the ordering.

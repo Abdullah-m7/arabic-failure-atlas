@@ -207,6 +207,8 @@ def build():
     spec.loader.exec_module(dc3)
     r = dc3.compute_v2()
     out["audit"] = {
+        "n": r["n"],
+        "gate_threshold": dc3.GATE_THRESHOLD,
         "human_kappa": r["human_kappa"],
         "consensus_n": r["consensus_n"],
         "gate_v1": r["gate_v1"],
