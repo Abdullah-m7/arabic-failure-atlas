@@ -162,7 +162,10 @@ def build():
     mcnemar_n01 = sum(out["stats"][arm]["Delta_M2_hijri"]["n01_first_better"]
                       for arm in ARMS if "Delta_M2_hijri" in out["stats"].get(arm, {}))
     assert flips == mcnemar_n01, (flips, mcnemar_n01)
+    m2_sets = {t["set_id"] for t in tasks.values() if t["mechanism"] == "M2"}
     out["stats"]["hijri_accounting"] = {
+        "pair_flip_sets": mcnemar_n01,
+        "total_m2_sets_5arms": len(m2_sets) * len(ARMS),
         "total_hijri_failures": total_fail,
         "pair_flips_greg_pass_hijri_fail": flips,
         "both_fail": both_fail,
@@ -174,6 +177,13 @@ def build():
     out["forensics"] = parse_forensics()
     out["adapter_effect"] = json.loads((SUM / "adapter_effect.json").read_text())
     out["alias"] = parse_alias_tables()
+    if FRONTIER_ARM in out["fingerprints"] and "M4" in out["fingerprints"][FRONTIER_ARM]:
+        # same basis as final_m4_strict (all-variant M4 strict, 2dp),
+        # recomputed from raw — NOT typed. NOTE: derives to 0.73, not the
+        # 0.70 asserted in the cycle-3 instruction (0.70 is cross_call_ar
+        # only); see the cycle-3 report.
+        out["alias"]["gemini_m4_strict"] = round(
+            out["fingerprints"][FRONTIER_ARM]["M4"]["strict"], 2)
 
     # Pre-registered criteria (numbers only; wording is the research lead's).
     spread = {

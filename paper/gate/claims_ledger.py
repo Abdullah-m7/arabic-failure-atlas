@@ -103,8 +103,16 @@ def _resolve_paths(tok: str, paths: list[tuple[str, float]]) -> list[str]:
     return [p for p, v in paths if gate._numeric_ok(tok, {v})]
 
 
+def _load_signoffs() -> list[dict]:
+    p = Path(__file__).with_name("ledger_signoffs.json")
+    if not p.exists():
+        return []
+    return json.loads(p.read_text(encoding="utf-8")).get("signoffs", [])
+
+
 def build_ledger(paper: str, numbers: dict | None = None,
-                 refs: str | None = None) -> str:
+                 refs: str | None = None,
+                 signoffs: list[dict] | None = None) -> str:
     paths: list[tuple[str, float]] = []
     if numbers:
         _path_values(numbers, "", paths)
@@ -142,6 +150,12 @@ def build_ledger(paper: str, numbers: dict | None = None,
         else:
             status = "MANUAL"
             source = "raw/log or citation"
+        # research-lead sign-offs (ledger_signoffs.json) override, keyed on
+        # claim-text substring so they survive regeneration
+        for so in (signoffs if signoffs is not None else _load_signoffs()):
+            if so["match"] in s:
+                status, source = so["status"], so["source"]
+                break
         rows.append(f"| {claim} | {source.replace('|', '/')} | {status} |")
 
     lines = ["# Claims Ledger (v1.1 — D32 provenance automation)", "",

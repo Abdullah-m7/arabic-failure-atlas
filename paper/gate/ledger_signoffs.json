@@ -1,0 +1,11 @@
+{
+  "signoffs": [
+    {
+      "match": "first mechanism-isolated documentation of this class",
+      "status": "MANUAL",
+      "source": "priority claim — seals at submission-day DC1 rescan (docs/dc1_rescan_checklist.md)",
+      "authority": "research lead, gate cycle 3"
+    }
+  ],
+  "_held_pending_row_confirmation": "cycle-3 R-11/R-19/R-23/R-31/R-40/R-52 VERIFIED flips — row numbers do not resolve against any printed ledger numbering and no source paths were included; awaiting row-text quotes from the research lead. R-40 precondition already satisfied: scripts/check_hijri_window.py OK (33/33 golds in 1448 AH)."
+}
