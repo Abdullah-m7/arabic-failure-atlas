@@ -4,13 +4,13 @@
 
 | check | result | count |
 |---|---|---|
-| SCI-1 | FAIL | 5 |
+| SCI-1 | FAIL | 2 |
 | SCI-2 | FAIL | 1 |
 | SCI-3 | PASS | 0 |
 | SCI-4 | PASS | 0 |
 | SCI-5 | FAIL | 11 |
 | SCI-6 | FAIL | 1 |
-| SCI-7 | FAIL | 30 |
+| SCI-7 | FAIL | 29 |
 | STY-1 | PASS | 0.2 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |
@@ -18,11 +18,8 @@
 | STY-5 | FAIL | 1 |
 
 ## SCI-1
-- L13: 36.1
 - L23: 53.1
 - L23: 249
-- L23: 87
-- L63: 0.33
 
 ## SCI-2
 - delta sentence without bracketed CI: The largest per-mechanism score shift was 0.05, inside the pre-set 0.10 confound
@@ -34,7 +31,7 @@
 - M1 (bidi/RTL) infra-confound noted in Phase 0; not in pilot — [acknowl
 
 ## SCI-7
-- MANUAL ledger rows: 26
+- MANUAL ledger rows: 25
 - PENDING-REFS ledger rows: 4
 
 ## STY-1

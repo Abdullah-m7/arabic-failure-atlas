@@ -85,7 +85,10 @@ def _collect_numbers(node, acc):
 
 def _numeric_ok(tok: str, allowed: set[float]) -> bool:
     v = float(tok)
-    for a in allowed:
+    for signed in allowed:
+        # prose tokens are unsigned (the minus sign sits outside the token),
+        # so match against the magnitude of stored values (D32 addendum)
+        a = abs(signed)
         if abs(a - v) < 5e-7 or abs(round(a, 2) - v) < 5e-3:
             return True
         if 0 <= a <= 1 and abs(round(a * 100, 1) - v) < 5e-2:  # percent form
@@ -105,17 +108,17 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
     # SCI-1 number provenance
     allowed: set[float] = set()
     _collect_numbers(numbers, allowed)
-    scrub = paper
-    for pat in WHITELIST_PATTERNS:
-        scrub = re.sub(pat, " ", scrub)
     orphans = []
-    for ln, line in enumerate(scrub.splitlines(), 1):
+    for ln, line in enumerate(paper.splitlines(), 1):
         if line.lstrip().startswith(("```", "<!--")):
             continue
-        # v1.1 (D32): drop cite-bearing sentences — their numerals are
-        # literature-owned and live in the claims ledger, refs-bound.
+        # v1.1 (D32): drop cite-bearing sentences BEFORE whitelist scrubbing
+        # (the model-name pattern would eat P1/S1 cite tokens) — their
+        # numerals are literature-owned and live in the claims ledger.
         kept = " ".join(s for s in re.split(r"(?<=[.!?])\s+", line)
                         if not CITE_RE.search(s))
+        for pat in WHITELIST_PATTERNS:
+            kept = re.sub(pat, " ", kept)
         for tok in re.findall(r"(?<![\w.\-])\d+(?:\.\d+)?(?![\w.\-])", kept):
             if not _numeric_ok(tok, allowed):
                 orphans.append(f"L{ln}: {tok}")

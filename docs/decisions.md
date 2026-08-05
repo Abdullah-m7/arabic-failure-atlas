@@ -337,3 +337,14 @@ blocks on UNVERIFIED+MANUAL+PENDING-REFS. Before/after on draft_v2
 SCI-5 11->11, SCI-6 1->1, SCI-7 78-all-UNVERIFIED->30 (48 VERIFIED,
 4 PENDING-REFS, 26 MANUAL), STY-1 pass->pass, STY-2 pass->pass, STY-3
 3->3 (pass, spans now printed), STY-4 1->0, STY-5 1->1.
+
+**D32-addendum — same pass:** two implementation defects fixed after the
+first v1.1 run and counts re-recorded: (1) cite detection now runs BEFORE
+whitelist scrubbing (the model-name pattern was eating P1/S1 tokens, so
+[P1]/[S1] sentences weren't exempted); (2) the SCI-1/ledger matcher
+compares unsigned prose tokens against the MAGNITUDE of stored values
+(negative deltas/CI bounds like −0.33 live signed in numbers.json while
+the minus sign sits outside the prose token). Final v1.1 counts on
+draft_v2: SCI-1 34->2 (both survivors are a real catch: the 53.1%/249
+sentence lost its [P2] cite in the v2 rewrite), SCI-7 -> 29 (49 VERIFIED,
+4 PENDING-REFS, 25 MANUAL); all other checks as in the D32 table.
