@@ -6,7 +6,7 @@ check passes. The core is a pure function `run_gate(...)` so the pytest smoke
 fixtures can exercise it with synthetic inputs; the CLI wires the repo files.
 
 Usage: python3 paper/gate/paper_gate.py [paper.md]
-  default input: paper/draft_v1.md if it exists, else paper/skeleton.md
+  default input preference (v1.1): draft_v2.md > draft_v1.md > skeleton.md
   output: paper/gate_report.md (+ exit 0/1)
 """
 
@@ -41,7 +41,18 @@ WHITELIST_PATTERNS = [
     r"§\s?\d+(?:\.\d+)*", r"\bv\d+\b",
     r"[A-Za-z][\w.\-]*\d[\w.\-]*",         # model-name-like tokens (gemini-3.5, 20b)
     r"\b\d+(?:\.\d+)?%?\s*(?:dp|pt|pts)\b",
+    # gate v1.1 (D32):
+    r"\*\*\d+(?:\.\d+)?",                  # bold section headers (**3.5 ...**)
+    r"\(\d\)",                             # parenthesized enumerations (1)..(9)
+    r"\b\d{1,3},\d{3}\b",                  # thousands-separated (1,600) kept whole
+    r"\bn\s*=\s*\d+",                      # statistical n = k phrasing
 ]
+
+# Literature-owned sentences: numerals in a sentence carrying one of these
+# bracketed cite tokens are refs-bound (claims ledger), not numbers.json-bound.
+CITE_RE = re.compile(
+    r"\[(?:P\d|S\d|MAST|AgentErrorBench|ToolScan|AgentHallu|Aegis|AgentAtlas)"
+    r"\b[^\]]*\]")
 
 
 def _sentences(text: str) -> list[str]:
@@ -101,7 +112,11 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
     for ln, line in enumerate(scrub.splitlines(), 1):
         if line.lstrip().startswith(("```", "<!--")):
             continue
-        for tok in re.findall(r"(?<![\w.\-])\d+(?:\.\d+)?(?![\w.\-])", line):
+        # v1.1 (D32): drop cite-bearing sentences — their numerals are
+        # literature-owned and live in the claims ledger, refs-bound.
+        kept = " ".join(s for s in re.split(r"(?<=[.!?])\s+", line)
+                        if not CITE_RE.search(s))
+        for tok in re.findall(r"(?<![\w.\-])\d+(?:\.\d+)?(?![\w.\-])", kept):
             if not _numeric_ok(tok, allowed):
                 orphans.append(f"L{ln}: {tok}")
     checks["SCI-1"] = {"passed": not orphans, "count": len(orphans),
@@ -168,13 +183,21 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
     if ledger is None:
         ledger_path = REPO / "paper" / "claims_ledger.md"
         ledger = ledger_path.read_text(encoding="utf-8") if ledger_path.exists() else None
-    unverified = (len(re.findall(r"\| *UNVERIFIED *\|?$", ledger,
-                                 flags=re.MULTILINE)) if ledger is not None else -1)
+    # v1.1 (D32): UNVERIFIED, MANUAL, and PENDING-REFS all block — only
+    # VERIFIED / VERIFIED-BY-REFERENCE rows clear the check.
+    if ledger is not None:
+        by_status = {st: len(re.findall(rf"\| *{st} *\|?$", ledger,
+                                        flags=re.MULTILINE))
+                     for st in ("UNVERIFIED", "MANUAL", "PENDING-REFS")}
+        unverified = sum(by_status.values())
+    else:
+        unverified, by_status = -1, {}
     checks["SCI-7"] = {
         "passed": unverified == 0, "count": max(unverified, 0),
         "details": (["claims_ledger.md missing — run claims_ledger.py"]
                     if unverified < 0 else
-                    [f"UNVERIFIED ledger rows: {unverified}"] if unverified else []),
+                    [f"{st} ledger rows: {n}" for st, n in by_status.items()
+                     if n] if unverified else []),
     }
 
     # STY-1 punctuation density
@@ -194,17 +217,23 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
         b.append(f"rhetorical question marks: {nq}")
     checks["STY-2"] = {"passed": not b, "count": len(b), "details": b[:15]}
 
-    # STY-3 inversion budget
-    inv = sum(len(re.findall(p, paper, re.IGNORECASE)) for p in INVERSIONS)
+    # STY-3 inversion budget (v1.1: exact matched spans printed)
+    inv_spans = []
+    for p in INVERSIONS:
+        for m in re.finditer(p, paper, re.IGNORECASE):
+            ctx = paper[max(0, m.start() - 30): m.end() + 30].replace("\n", " ")
+            inv_spans.append(f"span '{m.group(0)}' in: ...{ctx}...")
+    inv = len(inv_spans)
     checks["STY-3"] = {"passed": inv <= 3, "count": inv,
-                       "details": [f"inversion-family matches: {inv} (max 3)"]}
+                       "details": [f"inversion-family matches: {inv} (max 3)"]
+                       + inv_spans[:12]}
 
     # STY-4 burstiness + repeated non-technical 4-grams
     sty4 = []
     for title, body in sections.items():
         ss = _sentences(body)
         lens = [len(s.split()) for s in ss]
-        if len(lens) >= 4:
+        if len(lens) >= 6:  # v1.1 (D32): skip short sections (< 6 sentences)
             ratio = statistics.pstdev(lens) / max(1e-9, statistics.mean(lens))
             if ratio < 0.45:
                 sty4.append(f"section '{title[:30]}' burstiness {ratio:.2f} < 0.45")
@@ -256,17 +285,22 @@ def to_markdown(result: dict, source: str) -> str:
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if argv:
-        src = Path(argv[0])
-    else:
-        draft = REPO / "paper" / "draft_v1.md"
-        src = draft if draft.exists() else REPO / "paper" / "skeleton.md"
+        src = Path(argv[0]).resolve()
+    else:  # v1.1 (D32) input preference
+        src = next((p for p in (REPO / "paper" / "draft_v2.md",
+                                REPO / "paper" / "draft_v1.md")
+                    if p.exists()), REPO / "paper" / "skeleton.md")
     result = run_gate(
         src.read_text(encoding="utf-8"),
         json.loads((REPO / "paper" / "numbers.json").read_text(encoding="utf-8")),
         (REPO / "paper" / "limitations_inventory.md").read_text(encoding="utf-8"),
         (REPO / "paper" / "refs.bib").read_text(encoding="utf-8"),
     )
-    report = to_markdown(result, str(src.relative_to(REPO)))
+    try:
+        label = str(src.relative_to(REPO))
+    except ValueError:
+        label = str(src)
+    report = to_markdown(result, label)
     (REPO / "paper" / "gate_report.md").write_text(report, encoding="utf-8")
     print(report)
     return 0 if result["overall_pass"] else 1

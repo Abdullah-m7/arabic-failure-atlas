@@ -95,7 +95,7 @@ def delta_pairs(scored, mech, var_a, var_b):
 
 def build():
     tasks = {r["task_id"]: r for _, _, r in iter_records(REPO / "tasks" / "pilot")}
-    out = {"run_manifest": MANIFEST, "scorer_state": "scorer-freeze-v1",
+    out = {"run_manifest": MANIFEST, "scorer_state": "scorer-freeze-v2",
            "bootstrap": BOOTSTRAP, "seed": SEED,
            "fingerprints": {}, "deltas": {}, "aggregate_gaps": {}, "stats": {}}
 
@@ -218,6 +218,32 @@ def build():
         "scorer_vs_A": r["scorer_vs_A"],
         "scorer_vs_B": r["scorer_vs_B"],
         "dc3_verdict": r["dc3_verdict"],
+    }
+
+    # Corpus/paper meta (D32) — all derived, nothing retyped.
+    per_mech = {}
+    for t in tasks.values():
+        per_mech[t["mechanism"]] = per_mech.get(t["mechanism"], 0) + 1
+    pilot_records = sum(
+        1
+        for arm in OPEN_ARMS
+        for line in (REPO / "results" / "raw" / FROZEN_TS / f"{arm}.jsonl")
+        .read_text(encoding="utf-8").splitlines() if line.strip()
+    )
+    disc = out["criteria"]["discrimination_spread_points"]
+    out["meta"] = {
+        "total_tasks": len(tasks),
+        "total_sets": len({t["set_id"] for t in tasks.values()}),
+        "records_per_mechanism": dict(sorted(per_mech.items())),
+        "pilot_records": pilot_records,
+        "spread_m4_pts": round(disc["M4"]),
+        "spread_m6_pts": round(disc["M6"]),
+        # pre-registered H1 discrimination threshold (docs/phase0.md)
+        "threshold_discrimination_pts": 15,
+        "consistent_but_unlisted_counts": {
+            arm: [int(x) for x in frac.split("/")]
+            for arm, frac in out["alias"]["consistent_but_unlisted"].items()
+        },
     }
     return out
 

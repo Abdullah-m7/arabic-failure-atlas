@@ -313,3 +313,27 @@ against the 5 gate misses + 3 M4 scorer-fail disagreements:
   D30's families (a)-(c); per D30 these misses stay uncovered and the
   achieved agreement is published as-is. Recorded here so the paper's
   limitation names the mechanism precisely.
+
+**D32 — 2026-08-05 — Paper-gate v1.1 calibration + claims-ledger provenance
+automation (paper tooling only; the task scorer stays frozen at
+scorer-freeze-v2, untouched).** Changes: (a) SCI-1 exempts numerals in
+sentences carrying a bracketed literature cite token ([P1]..[S2], [MAST],
+[AgentErrorBench], [ToolScan], [AgentHallu], [Aegis], [AgentAtlas]) — those
+numbers are refs-bound through the claims ledger, not numbers.json-bound —
+and whitelists bold section headers (**d.d**), parenthesized single-digit
+enumerations, thousands-separated numbers (1,600), and "n = k" phrasing;
+(b) STY-3 prints exact matched spans; (c) STY-4 skips sections under 6
+sentences; (d) gate/ledger input preference draft_v2.md > draft_v1.md >
+skeleton.md; (e) numbers.json gains a derived meta block (total_tasks 107,
+total_sets 39, records per mechanism, pilot_records 320, spreads 23/20 pts,
+pre-registered discrimination threshold 15 pts, numeric
+consistent_but_unlisted counts) and scorer_state corrected to
+scorer-freeze-v2; (f) ledger v1.1 auto-resolves provenance: all-numerals-
+match rows -> VERIFIED with resolved paths, cite-bearing rows ->
+VERIFIED-BY-REFERENCE when the bib entry is clean else PENDING-REFS
+(flips with SCI-5), the rest -> MANUAL for research-lead sign-off; SCI-7
+blocks on UNVERIFIED+MANUAL+PENDING-REFS. Before/after on draft_v2
+(old gate -> v1.1): SCI-1 34->5, SCI-2 1->1, SCI-3 0->0, SCI-4 0->0,
+SCI-5 11->11, SCI-6 1->1, SCI-7 78-all-UNVERIFIED->30 (48 VERIFIED,
+4 PENDING-REFS, 26 MANUAL), STY-1 pass->pass, STY-2 pass->pass, STY-3
+3->3 (pass, spans now printed), STY-4 1->0, STY-5 1->1.

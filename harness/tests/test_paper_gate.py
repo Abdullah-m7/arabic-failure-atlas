@@ -50,9 +50,19 @@ def test_fail_fixture_fails_the_right_checks():
     assert not c["STY-5"]["passed"]      # "The" opener repetition
 
 
-def test_claims_ledger_flags_numerals_and_superlatives():
+def test_claims_ledger_v11_statuses():
     text = ("All five arms failed. The score was 0.42 overall. "
+            "A 5–10% drop is reported in prior work [P1]. "
             "Nothing numeric or superlative lives here at last.")
+    # no numbers/refs given: numeral + superlative rows -> MANUAL, cite row
+    # -> PENDING-REFS (bib key unknown = dirty)
     md = ledger.build_ledger("# t\n\n## s\n\n" + text)
-    assert md.count("UNVERIFIED") >= 2
+    assert md.count("| MANUAL |") >= 2
+    assert md.count("| PENDING-REFS |") == 1
     assert "0.42" in md
+    # numerals resolving in numbers -> VERIFIED with path; clean bib -> V-B-R
+    md2 = ledger.build_ledger(
+        "# t\n\n## s\n\n" + text, numbers={"score": 0.42},
+        refs="@inproceedings{kubrak2026arabicprompts, title={x}}")
+    assert md2.count("| VERIFIED |") == 1 and "score=0.42" in md2
+    assert md2.count("| VERIFIED-BY-REFERENCE |") == 1
