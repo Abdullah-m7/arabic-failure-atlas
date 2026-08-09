@@ -6,7 +6,7 @@ check passes. The core is a pure function `run_gate(...)` so the pytest smoke
 fixtures can exercise it with synthetic inputs; the CLI wires the repo files.
 
 Usage: python3 paper/gate/paper_gate.py [paper.md]
-  default input preference (v1.1): draft_v3.md > draft_v2.md > draft_v1.md > skeleton.md
+  default input preference (v1.1): draft_v4.md > draft_v3.md > draft_v2.md > draft_v1.md > skeleton.md
   output: paper/gate_report.md (+ exit 0/1)
 """
 
@@ -296,7 +296,8 @@ def main(argv=None) -> int:
     if argv:
         src = Path(argv[0]).resolve()
     else:  # v1.1 (D32) input preference
-        src = next((p for p in (REPO / "paper" / "draft_v3.md",
+        src = next((p for p in (REPO / "paper" / "draft_v4.md",
+                                REPO / "paper" / "draft_v3.md",
                                 REPO / "paper" / "draft_v2.md",
                                 REPO / "paper" / "draft_v1.md")
                     if p.exists()), REPO / "paper" / "skeleton.md")

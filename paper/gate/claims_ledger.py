@@ -20,7 +20,7 @@ Gate check SCI-7 passes only when no UNVERIFIED/MANUAL/PENDING-REFS rows
 remain.
 
 Usage: python3 paper/gate/claims_ledger.py [paper.md] -> paper/claims_ledger.md
-  default input preference (v1.1): draft_v3.md > draft_v2.md > draft_v1.md > skeleton.md
+  default input preference (v1.1): draft_v4.md > draft_v3.md > draft_v2.md > draft_v1.md > skeleton.md
 """
 
 from __future__ import annotations
@@ -174,7 +174,8 @@ def main(argv=None) -> int:
     if argv:
         src = Path(argv[0]).resolve()
     else:
-        src = next((p for p in (REPO / "paper" / "draft_v3.md",
+        src = next((p for p in (REPO / "paper" / "draft_v4.md",
+                                REPO / "paper" / "draft_v3.md",
                                 REPO / "paper" / "draft_v2.md",
                                 REPO / "paper" / "draft_v1.md")
                     if p.exists()), REPO / "paper" / "skeleton.md")
