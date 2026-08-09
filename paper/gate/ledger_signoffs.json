@@ -1,10 +1,10 @@
 {
   "signoffs": [
     {
-      "match": "first mechanism-isolated documentation of this class",
-      "status": "MANUAL",
-      "source": "priority claim — seals at submission-day DC1 rescan (docs/dc1_rescan_checklist.md)",
-      "authority": "research lead, gate cycle 3"
+      "match": "first mechanism-isolated documentation of a civic-systems failure",
+      "status": "VERIFIED-BY-DOC",
+      "source": "docs/dc1_rescan_checklist.md RESCAN EXECUTED 2026-08-09: CLEAR with mandated edits; MLCL adjudicated nearest-not-covering; claim scoped 'to our knowledge' per mandate",
+      "authority": "research lead, DC1 rescan 2026-08-09"
     },
     {
       "match": "Every arm attempts conversion in every case",

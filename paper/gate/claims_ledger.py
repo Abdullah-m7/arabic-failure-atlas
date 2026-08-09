@@ -45,6 +45,7 @@ CITE_TO_BIBKEY = {
     "P2": "ersoy2025toolcalling",
     "P3": "nacar2026language",
     "P4": "bariah2026telcoagent",
+    "MLCL": "luo2026lost",
     "S1": "kulkarni2025massive",
     "S2": "arabicsurvey2025",
     "MAST": "cemri2025mast",
@@ -55,7 +56,7 @@ CITE_TO_BIBKEY = {
     "AgentAtlas": "agentatlas2026",
 }
 CITE_TOKEN_RE = re.compile(
-    r"P\d\s*[–-]\s*P\d|P\d|S\d|MAST|AgentErrorBench|ToolScan|AgentHallu|Aegis|AgentAtlas")
+    r"P\d\s*[–-]\s*P\d|P\d|S\d|MLCL|MAST|AgentErrorBench|ToolScan|AgentHallu|Aegis|AgentAtlas")
 
 
 def sentences(text: str) -> list[str]:
