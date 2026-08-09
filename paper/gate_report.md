@@ -5,27 +5,23 @@
 | check | result | count |
 |---|---|---|
 | SCI-1 | PASS | 0 |
-| SCI-2 | FAIL | 2 |
+| SCI-2 | PASS | 0 |
 | SCI-3 | PASS | 0 |
 | SCI-4 | PASS | 0 |
 | SCI-5 | FAIL | 11 |
 | SCI-6 | PASS | 0 |
-| SCI-7 | FAIL | 26 |
+| SCI-7 | FAIL | 10 |
 | STY-1 | PASS | 0.2 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |
 | STY-4 | PASS | 0 |
 | STY-5 | PASS | 0 |
 
-## SCI-2
-- delta sentence without bracketed CI: All four remaining misses are anatomized record-by-record in Appendix D.  **3.5 
-- delta sentence without bracketed CI: Significance uses exact McNemar/sign tests on discordant pairs, Holm-corrected a
-
 ## SCI-5
 - refs.bib TODO-verify entries: 11
 
 ## SCI-7
-- MANUAL ledger rows: 23
+- MANUAL ledger rows: 7
 - PENDING-REFS ledger rows: 3
 
 ## STY-1

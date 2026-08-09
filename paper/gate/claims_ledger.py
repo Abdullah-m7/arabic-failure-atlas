@@ -162,6 +162,8 @@ def build_ledger(paper: str, numbers: dict | None = None,
              "VERIFIED = all numerals resolve in numbers.json (SCI-1 matcher).",
              "VERIFIED-BY-REFERENCE = cite-bound, bib entry clean.",
              "PENDING-REFS = cite-bound, bib entry still TODO-verify.",
+             "VERIFIED-BY-DOC = grounded in a repository document (cycle-6",
+             "sign-offs; path + anchor in the source column).",
              "MANUAL = needs research-lead line-by-line sign-off.",
              "Gate SCI-7 passes only when no UNVERIFIED/MANUAL/PENDING-REFS",
              "rows remain.", "",
@@ -184,8 +186,8 @@ def main(argv=None) -> int:
     ledger = build_ledger(src.read_text(encoding="utf-8"), numbers, refs)
     (REPO / "paper" / "claims_ledger.md").write_text(ledger, encoding="utf-8")
     counts = {st: ledger.count(f"| {st} |")
-              for st in ("VERIFIED", "VERIFIED-BY-REFERENCE", "PENDING-REFS",
-                         "MANUAL", "UNVERIFIED")}
+              for st in ("VERIFIED", "VERIFIED-BY-REFERENCE", "VERIFIED-BY-DOC",
+                         "PENDING-REFS", "MANUAL", "UNVERIFIED")}
     print(f"wrote paper/claims_ledger.md ({sum(counts.values())} rows): "
           + ", ".join(f"{k}={v}" for k, v in counts.items() if v))
     return 0
