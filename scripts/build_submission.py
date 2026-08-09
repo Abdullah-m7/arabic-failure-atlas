@@ -144,6 +144,9 @@ def main() -> None:
     tex = (
         "\\pdfoutput=1\n"  # force arXiv AutoTeX onto pdflatex
         "\\documentclass[11pt]{article}\n"
+        # pandoc emits \def\LTcaptype{none}; longtable v4.23 (TL2025)
+        # resolves that to a real counter — define it; inert elsewhere
+        "\\newcounter{none}\n"
         "\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n"
         "\\usepackage{cmap}\n"
         "\\usepackage{graphicx}\n\\usepackage[margin=1in]{geometry}\n"
