@@ -36,8 +36,10 @@ SYMBOL_GLYPHS = {
     "§": {"§"},
     "↔": {"↔"},
     "×": {"×"},
+    "\u2192": {"\u2192"},
+    "\u2014": {"\u2014"},
 }
-NAMES = {"−": "MINUS U+2212"}
+NAMES = {"−": "MINUS U+2212", "\u2192": "ARROW U+2192", "\u2014": "EM DASH U+2014"}
 
 
 def pdf_text(path: Path) -> tuple[str, str, int]:
@@ -61,6 +63,9 @@ def main() -> int:
     pdf = Path(sys.argv[1])
     src_path = Path(sys.argv[2]) if len(sys.argv) > 2 else REPO / "paper" / "submission_full.md"
     src = src_path.read_text(encoding="utf-8")
+    # the markdown author byline is superseded by \maketitle in the build —
+    # its characters never reach the PDF body by design
+    src = re.sub(r"\*\*Abdullah Almohammedi\*\* — [^\n]*\n", "", src, count=1)
     all_text, t, nfig = pdf_text(pdf)
     problems, report = [], []
     report.append(f"  figure pages excluded from symbol/CI/bib checks: {nfig}")

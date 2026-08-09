@@ -35,6 +35,10 @@ RUN_LABELS = {
 
 
 def run_rows():
+    """One row per manifest run. Records and models are counted directly
+    from the run directory's *.jsonl files (run_summary.json holds only the
+    last-written arm on multi-arm runs, so it is NOT trusted here);
+    EXCLUDED-* quarantine files never count."""
     rows = []
     flat = {}
     for k, v in MANIFEST.items():
@@ -42,15 +46,35 @@ def run_rows():
             flat[k] = v
         elif isinstance(v, dict):
             flat.update(v)
+    meta_n = N["meta"]
+    expected = {
+        "frozen": meta_n["pilot_records"],
+        "m3": 4 * meta_n["records_per_mechanism"]["M3"],
+        "frontier": meta_n["total_tasks"],
+    }
+    counted = {}
     for name, ts in flat.items():
         d = REPO / "results" / "raw" / ts
         meta = json.loads((d / "meta.json").read_text(encoding="utf-8"))
-        summ = json.loads((d / "run_summary.json").read_text(encoding="utf-8"))
-        records = sum(s["ok"] + s["output_errors"] for s in summ)
-        models = ", ".join(s["model"] for s in summ)
+        files = sorted(p for p in d.glob("*.jsonl")
+                       if not p.name.startswith(("EXCLUDED", "fixtures")))
+        files += sorted(d.glob("fixtures-*.jsonl"))  # fixture smoke run
+        records = sum(sum(1 for ln in p.read_text(encoding="utf-8").splitlines()
+                          if ln.strip()) for p in files)
+        models = ", ".join(p.stem for p in files)
+        counted[name] = records
         rows.append(f"| {RUN_LABELS.get(name, name)} | {ts} | "
                     f"`{meta['git_commit'][:12]}` | {meta['seed']} | "
                     f"{meta['n_tasks']} | {records} | {models} |")
+    for key, want in expected.items():
+        assert counted[key] == want, f"run {key}: counted {counted[key]} != {want}"
+    assert counted["adapter_check"] == json.loads(
+        (REPO / "results" / "raw" / flat["adapter_check"] / "meta.json")
+        .read_text(encoding="utf-8"))["n_tasks"], "adapter-check record count"
+    multi = [r for r in rows if "full pilot" in r or "M3" in r]
+    for r in multi:
+        assert r.count("deepseek") == 2 and "gpt-oss-20b" in r and "qwen3.5-397b" in r, \
+            f"multi-arm run row missing arms: {r}"
     return rows
 
 

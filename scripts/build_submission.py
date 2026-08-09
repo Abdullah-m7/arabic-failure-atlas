@@ -33,6 +33,8 @@ SYMBOL_MAP = {
     "↔": r"$\leftrightarrow$",
     "×": r"$\times$",
     "±": r"$\pm$",
+    "\u2192": r"$\rightarrow$",
+    "\u2190": r"$\leftarrow$",
     "µ": r"$\mu$",
 }
 
@@ -50,6 +52,9 @@ def esc_verbatim_line(line: str) -> str:
     out = "".join(TEX_SPECIALS.get(c, c) for c in line)
     for u, cmd in SYMBOL_MAP.items():
         out = out.replace(u, cmd)
+    # lmtt has no dash ligatures/glyphs via inputenc — name them explicitly
+    out = out.replace("\u2014", "\\textemdash{}")
+    out = out.replace("\u2013", "\\textendash{}")
     return out
 
 
