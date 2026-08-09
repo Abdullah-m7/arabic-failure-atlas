@@ -11,6 +11,7 @@
 | SCI-5 | PASS | 0 |
 | SCI-6 | PASS | 0 |
 | SCI-7 | PASS | 0 |
+| SCI-8 | PASS | 0 |
 | STY-1 | PASS | 0.8 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |

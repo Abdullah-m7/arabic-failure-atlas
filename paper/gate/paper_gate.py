@@ -230,6 +230,40 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
                      if n] if unverified else []),
     }
 
+    # SCI-8 cross-document consistency (final build fix): figures shared by
+    # the main text and the appendices must match the canonical values in
+    # numbers.json exactly. Historical mentions live in fenced reproductions
+    # and table rows, which are already blanked (D35).
+    meta = numbers.get("meta") or {}
+    mism = []
+    number_words = {"three": 3, "four": 4, "five": 5, "six": 6}
+    for pat, key, label in (
+            (r"(\d+)\s+task records", "total_tasks", "task records"),
+            (r"benchmark of (\d+) tasks", "total_tasks", "tasks"),
+            (r"(\d+)\s+(?:matched )?sets and \d+ task", "total_sets", "total sets"),
+            (r"(\d+) pilot records", "pilot_records", "pilot records")):
+        if key not in meta:
+            continue
+        for m in re.finditer(pat, paper):
+            if int(m.group(1)) != meta[key]:
+                mism.append(f"{label}: {m.group(1)} != {meta[key]} "
+                            f"(...{paper[max(0, m.start()-30):m.start()].strip()[-30:]}...)")
+    n_arms = len(numbers.get("fingerprints") or {})
+    if n_arms:
+        for m in re.finditer(r"\b([Tt]hree|[Ff]our|[Ff]ive|[Ss]ix|\d+)\s+arms\b",
+                             paper):
+            tok = m.group(1).lower()
+            v = int(tok) if tok.isdigit() else number_words[tok]
+            if v != n_arms:
+                mism.append(f"arm count: {v} != {n_arms}")
+    state = numbers.get("scorer_state")
+    if state:
+        for m in re.finditer(r"scorer-freeze-v\d", paper):
+            if m.group(0) != state:
+                mism.append(f"scorer version: {m.group(0)} != {state}")
+    checks["SCI-8"] = {"passed": not mism, "count": len(mism),
+                       "details": mism[:15]}
+
     # STY-1 punctuation density
     em = paper.count("—") * 1000 / n_words
     semi = paper.count(";") * 1000 / n_words

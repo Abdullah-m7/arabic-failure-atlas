@@ -1,5 +1,10 @@
 {
   "frozen": "20260803T081111Z",
   "m3": "20260803T151642Z-m3",
-  "frontier": "20260803T151720Z"
+  "frontier": "20260803T151720Z",
+  "aux": {
+    "fixture_smoke": "20260802T185636Z",
+    "smoke": "20260803T080923Z-smoke",
+    "adapter_check": "20260803T101427Z"
+  }
 }

@@ -25,7 +25,10 @@ from atlas.validate import iter_records  # noqa: E402
 
 MANIFEST = json.loads((REPO / "paper" / "run_manifest.json").read_text(encoding="utf-8"))
 FROZEN_TS = MANIFEST["frozen"]
-RAW_DIRS = [REPO / "results" / "raw" / ts for ts in MANIFEST.values() if ts]
+# scored runs only — aux entries (smoke/adapter/fixtures) are listed in the
+# manifest for the reproducibility appendix but never rescored here
+RAW_DIRS = [REPO / "results" / "raw" / ts for ts in MANIFEST.values()
+            if isinstance(ts, str) and ts]
 SUM = REPO / "results" / "summaries" / FROZEN_TS
 
 OPEN_ARMS = ["gpt-oss-20b", "deepseek-v4-flash-think", "deepseek-v4-flash-nothink",
