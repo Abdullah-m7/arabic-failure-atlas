@@ -156,7 +156,7 @@ def build_ledger(paper: str, numbers: dict | None = None,
             if so["match"] in s:
                 if so["status"] == "INTERPRETIVE":  # D34 constraints
                     assert not toks, f"D34: INTERPRETIVE on numeral row: {s[:60]}"
-                    assert "\u00a7" in so["source"] or "SS" in so["source"], \
+                    assert re.search(r"\u00a7\s?\d|section \d", so["source"]), \
                         f"D34: INTERPRETIVE without section ref: {so['match']}"
                 status, source = so["status"], so["source"]
                 break

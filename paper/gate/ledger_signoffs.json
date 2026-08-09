@@ -101,7 +101,43 @@
       "status": "VERIFIED-BY-DOC",
       "source": "harness/atlas/adapters/base.py MAX_TOOL_ROUNDS = 4 + docs/decisions.md D18 (canned English success payloads, no executable backends)",
       "authority": "cycle-6 grounding"
+    },
+    {
+      "match": "zeros elsewhere in the table are earned",
+      "status": "INTERPRETIVE",
+      "source": "reads §4.6 (numerals control: strict 0.85-1.00, both nonzero deltas n.s. after Holm)",
+      "authority": "research lead, gate cycle 7 (D34)"
+    },
+    {
+      "match": "survives none of our isolations intact",
+      "status": "INTERPRETIVE",
+      "source": "reads §4.2 (calendar isolation) and §4.5 (discipline at scale)",
+      "authority": "research lead, gate cycle 7 (D34)"
+    },
+    {
+      "match": "None of it identifies the linguistic property",
+      "status": "MANUAL",
+      "source": "literature-negative claim — seals at submission-day DC1 rescan",
+      "authority": "research lead, gate cycle 7"
+    },
+    {
+      "match": "None of them identifies the linguistic property",
+      "status": "MANUAL",
+      "source": "literature-negative claim — seals at submission-day DC1 rescan",
+      "authority": "research lead, gate cycle 7"
+    },
+    {
+      "match": "Appendix D reproduces the DC3 report in full",
+      "status": "MANUAL",
+      "source": "grounds when appendices are assembled (source doc: audit/DC3_REPORT_v2.md)",
+      "authority": "research lead, gate cycle 7"
+    },
+    {
+      "match": "The 20B arm is weakest on M4 and M6, though not on the numerals control",
+      "status": "VERIFIED-BY-DOC",
+      "source": "paper/numbers.json fingerprints: gpt-oss-20b min on M4 (0.60) and M6 (0.70), not on M3 (0.926 > think 0.852 = min, rounds to 0.85); all nine figure assertions ran at commit b5866f9 (cycle-7 edit script)",
+      "authority": "cycle-7 grounding (comparative claims asserted programmatically)"
     }
   ],
-  "_ungrounded_manual": "rows left MANUAL after cycle-6 grounding: two literature-negative claims (taxonomy axes — DC1 re-scan territory), the 397B/closed-arm 'lead on M4 and M6' profile sentence (INACCURATE vs fingerprints: closed arm M4 0.733 < think 0.833, M6 0.80 < nothink 0.85 — flagged to research lead), two interpretive sentences (zeros-earned, aggregate-framing), the priority claim (sealed at DC1 rescan), and the Appendix-D reproduction promise (appendices not yet assembled)."
+  "_ungrounded_manual": "after cycle 7: rows 1/2/6 MANUAL sealed at DC1 rescan; row 7 MANUAL until appendices assembled; the inaccurate profile sentence was fixed in prose (cycle-7 edit) and now auto-verifies."
 }

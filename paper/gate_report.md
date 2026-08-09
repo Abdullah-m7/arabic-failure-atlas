@@ -10,7 +10,7 @@
 | SCI-4 | PASS | 0 |
 | SCI-5 | FAIL | 11 |
 | SCI-6 | PASS | 0 |
-| SCI-7 | FAIL | 10 |
+| SCI-7 | FAIL | 7 |
 | STY-1 | PASS | 0.2 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |
@@ -21,7 +21,7 @@
 - refs.bib TODO-verify entries: 11
 
 ## SCI-7
-- MANUAL ledger rows: 7
+- MANUAL ledger rows: 4
 - PENDING-REFS ledger rows: 3
 
 ## STY-1
