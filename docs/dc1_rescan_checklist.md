@@ -61,3 +61,27 @@ For every hit: paper_id, one-line design summary, and the three-way verdict
 per mechanism (COVERED / PARTIAL / ABSENT) with an anchor quote ≤20 words —
 same evidence discipline as Phase 0.5. Anything ambiguous goes to the research
 lead with the quote, not a paraphrase.
+
+---
+
+## RESCAN EXECUTED — 2026-08-09 (submission day)
+
+Result: **CLEAR with mandated edits** (research-lead web session; facts
+relayed and applied in-repo the same day).
+
+- NEW NEAR-NEIGHBOR found and integrated: **MLCL** — Luo, Kutralingam,
+  Okoani, Xu, Wei, Hu, "Lost in Execution: On the Multilingual Robustness
+  of Tool Calling in Large Language Models", arXiv:2601.05366 (2026).
+  Diagnostic benchmark for multilingual tool calling in Chinese, Hindi,
+  Igbo; isolates parameter-value language mismatch as a dominant
+  execution-level failure mode; tests inference-time mitigations.
+  Verdict: NEAREST WORK ON OUR AXIS, not covering — no matched-variant
+  isolation, no Arabic, no calendar/civic mechanism. Mandated edits:
+  related-work paragraph rewrite (draft v5 edit b), negative claims
+  softened (edits a/b), priority claim scoped "to our knowledge" +
+  civic-systems qualifier (edit c). Cited as `luo2026lost`.
+- Adjacent, noted, NOT competing: PolyWorkBench (arXiv:2607.06008),
+  SEATauBench (arXiv:2606.28715) — multilingual agent benchmarks without
+  mechanism isolation; no edit mandated.
+- Kill-rule DC1 verdict: STANDS (no source isolates M2/M4/M6 with
+  matched pairs).
