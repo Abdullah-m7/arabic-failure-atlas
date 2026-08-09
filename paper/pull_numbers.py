@@ -19,7 +19,8 @@ sys.path.insert(0, str(REPO / "harness"))
 from atlas import ANCHOR_VARIANTS  # noqa: E402
 from atlas.report import DELTAS, compute_deltas, fingerprint, mean  # noqa: E402
 from atlas.scoring import score_task  # noqa: E402
-from atlas.stats import exact_sign_test, holm_bonferroni, paired_counts  # noqa: E402
+from atlas.stats import (clopper_pearson, exact_sign_test,  # noqa: E402
+                         holm_bonferroni, paired_counts)
 from atlas.validate import iter_records  # noqa: E402
 
 MANIFEST = json.loads((REPO / "paper" / "run_manifest.json").read_text(encoding="utf-8"))
@@ -48,6 +49,59 @@ def rescore(arm, tasks):
                            rec.get("final_text") or "")
             scored.append(s)
     return scored
+
+
+def rescore_scorer_v1(arm, tasks):
+    """Rescore an arm under scorer-freeze-v1 semantics for the sensitivity
+    block ONLY: M6 tasks take the legacy exact-order/exact-count AST path
+    (pre-D31) via a mechanism shim; every other mechanism scores identically
+    in v1 and v2. Official scoring stays scorer-freeze-v2 everywhere else."""
+    scored = []
+    for raw_dir in RAW_DIRS:
+        path = raw_dir / f"{arm}.jsonl"
+        if not path.exists():
+            continue
+        for line in path.open(encoding="utf-8"):
+            rec = json.loads(line)
+            task = tasks[rec["task_id"]]
+            if task["mechanism"] == "M6":
+                shim = dict(task)
+                shim["mechanism"] = "M6-legacy"
+                s = score_task(shim, rec.get("pred_calls") or [],
+                               rec.get("final_text") or "")
+                s["mechanism"] = "M6"
+            else:
+                s = score_task(task, rec.get("pred_calls") or [],
+                               rec.get("final_text") or "")
+            scored.append(s)
+    return scored
+
+
+def parse_external_anchors():
+    """External aggregate figures for H2 re-anchoring, parsed from the
+    verified anchor quotes in paper/related_pack.md — never typed here."""
+    md = (REPO / "paper" / "related_pack.md").read_text(encoding="utf-8")
+    s1 = re.search(r"ar-SA ([\d.]+)% vs en-US ([\d.]+)%", md)
+    p1 = re.search(r"(\d+)-(\d+)% accuracy with English prompts.*?plummet to (\d+)-(\d+)%",
+                   md, re.DOTALL)
+    assert s1 and p1, "related_pack.md anchor quotes not found — layout changed?"
+    ar, en = float(s1.group(1)), float(s1.group(2))
+    return {
+        "s1_aggregate_gap": {
+            "arabic_pct": ar, "english_pct": en,
+            "gap_pct": round(en - ar, 2),
+            "bibkey": "kulkarni2025massive",
+            "source": "related_pack.md anchor (best model, ar-SA vs en-US)"},
+        "p1_per_category_collapse": {
+            "english_range_pct": [int(p1.group(1)), int(p1.group(2))],
+            "arabic_range_pct": [int(p1.group(3)), int(p1.group(4))],
+            "bibkey": "kubrak2026arabicprompts",
+            "source": "related_pack.md anchor (SIV-C1) [VERIFY AT RE-SCAN]"},
+        "p1_average_drop_pct": {
+            "range": None, "bibkey": "kubrak2026arabicprompts",
+            "note": "the 5-10% average-drop figure cited in the draft is NOT "
+                    "carded in related_pack.md — confirm at DC1 re-scan"},
+    }
 
 
 def parse_forensics():
@@ -81,6 +135,24 @@ def parse_alias_tables():
             "consistent_but_unlisted": unlisted,
             "final_m4_strict": frozen,  # post-freeze (scorer-freeze-v1)
             "label": "post-freeze (scorer-freeze-v1)"}
+
+
+def exact_delta_ci(pairs):
+    """Exact Clopper-Pearson 95% CI for a headline delta, reported ALONGSIDE
+    the pre-registered bootstrap CI (never replacing it). Valid only when
+    every per-set difference is one-directional binary (all in {0,1} or all
+    in {0,-1}) — then the delta IS a binomial proportion. Mixed-sign or
+    fractional set differences get null with the reason recorded."""
+    diffs = [a - b for a, b in pairs]
+    n = len(diffs)
+    if all(d in (0.0, 1.0) for d in diffs):
+        lo, hi = clopper_pearson(int(sum(diffs)), n)
+        return {"lo": round(lo, 4), "hi": round(hi, 4), "method": "clopper_pearson"}
+    if all(d in (0.0, -1.0) for d in diffs):
+        lo, hi = clopper_pearson(int(-sum(diffs)), n)
+        return {"lo": round(-hi, 4), "hi": round(-lo, 4), "method": "clopper_pearson"}
+    return {"lo": None, "hi": None,
+            "method": "not-binomial (mixed-sign per-set differences)"}
 
 
 def delta_pairs(scored, mech, var_a, var_b):
@@ -121,6 +193,8 @@ def build():
             pairs = delta_pairs(scored_by_arm[arm], mech, va, vb)
             if not pairs:
                 continue
+            if name in out["deltas"][arm]:
+                out["deltas"][arm][name]["ci_exact"] = exact_delta_ci(pairs)
             n01, n10 = paired_counts(pairs)
             p = exact_sign_test(n01, n10)
             key = f"{arm}::{name}"
@@ -229,6 +303,52 @@ def build():
         "scorer_vs_B": r["scorer_vs_B"],
         "dc3_verdict": r["dc3_verdict"],
     }
+
+    # Sensitivity: every headline figure under scorer-freeze-v1 vs -v2
+    # (external-review prep). M2/M3 rows asserted bit-identical.
+    v1_fp, v1_deltas, v1_gaps = {}, {}, {}
+    for arm in ARMS:
+        v1_scored = rescore_scorer_v1(arm, tasks)
+        v1_fp[arm] = fingerprint(v1_scored)
+        v1_deltas[arm] = compute_deltas(v1_scored, BOOTSTRAP, SEED)
+        anchors = [s["score"] for s in v1_scored if s["variant"] in ANCHOR_VARIANTS]
+        arabics = [s["score"] for s in v1_scored if s["variant"] not in ANCHOR_VARIANTS]
+        v1_gaps[arm] = mean(anchors) - mean(arabics)
+    sens = {"strict": {}, "deltas": {}, "aggregate_gaps": {},
+            "h4_think_minus_nothink": {}}
+    for arm in ARMS:
+        sens["strict"][arm] = {
+            mech: {"v1": v1_fp[arm][mech]["strict"],
+                   "v2": out["fingerprints"][arm][mech]["strict"],
+                   "changed": v1_fp[arm][mech]["strict"]
+                   != out["fingerprints"][arm][mech]["strict"]}
+            for mech in out["fingerprints"][arm]}
+        sens["deltas"][arm] = {
+            name: {"v1": v1_deltas[arm][name]["delta"],
+                   "v2": out["deltas"][arm][name]["delta"],
+                   "changed": v1_deltas[arm][name]["delta"]
+                   != out["deltas"][arm][name]["delta"]}
+            for name in out["deltas"][arm]}
+        sens["aggregate_gaps"][arm] = {
+            "v1": v1_gaps[arm], "v2": out["aggregate_gaps"][arm]["gap"],
+            "changed": v1_gaps[arm] != out["aggregate_gaps"][arm]["gap"]}
+    for mech in MECHS:
+        think, nothink = "deepseek-v4-flash-think", "deepseek-v4-flash-nothink"
+        if mech in v1_fp.get(think, {}) and mech in v1_fp.get(nothink, {}):
+            h1 = v1_fp[think][mech]["strict"] - v1_fp[nothink][mech]["strict"]
+            h2 = (out["fingerprints"][think][mech]["strict"]
+                  - out["fingerprints"][nothink][mech]["strict"])
+            sens["h4_think_minus_nothink"][mech] = {
+                "v1": h1, "v2": h2, "changed": h1 != h2}
+    for arm in ARMS:
+        for mech in ("M2", "M3"):
+            if mech in sens["strict"][arm]:
+                assert not sens["strict"][arm][mech]["changed"], (arm, mech)
+        for name in sens["deltas"][arm]:
+            if "M2" in name or "M3" in name:
+                assert not sens["deltas"][arm][name]["changed"], (arm, name)
+    out["sensitivity"] = sens
+    out["external_anchors"] = parse_external_anchors()
 
     # Corpus/paper meta (D32) — all derived, nothing retyped.
     per_mech = {}

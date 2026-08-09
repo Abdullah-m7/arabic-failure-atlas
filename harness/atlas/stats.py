@@ -50,3 +50,37 @@ def holm_bonferroni(pvalues: dict) -> dict:
         running_max = max(running_max, adj)  # enforce monotonicity
         adjusted[key] = running_max
     return adjusted
+
+
+def _binom_cdf(k: int, n: int, p: float) -> float:
+    from math import comb
+    return sum(comb(n, i) * p**i * (1 - p) ** (n - i) for i in range(k + 1))
+
+
+def clopper_pearson(k: int, n: int, alpha: float = 0.05) -> tuple[float, float]:
+    """Exact (Clopper-Pearson) two-sided CI for a binomial proportion k/n,
+    solved by bisection on the exact binomial tails (stdlib-only).
+
+    lower: largest p with P(X >= k | p) = alpha/2  (0 when k == 0)
+    upper: smallest p with P(X <= k | p) = alpha/2 (1 when k == n)
+    """
+    assert 0 <= k <= n and n > 0
+
+    def solve(f, increasing):
+        # find p in (0,1) with f(p) == alpha/2; f monotone in p
+        lo, hi = 0.0, 1.0
+        for _ in range(100):
+            mid = (lo + hi) / 2
+            too_high = f(mid) > alpha / 2
+            if too_high == increasing:
+                hi = mid
+            else:
+                lo = mid
+        return (lo + hi) / 2
+
+    # P(X >= k | p) increases with p; P(X <= k | p) decreases with p
+    lower = 0.0 if k == 0 else solve(
+        lambda p: 1 - _binom_cdf(k - 1, n, p), increasing=True)
+    upper = 1.0 if k == n else solve(
+        lambda p: _binom_cdf(k, n, p), increasing=False)
+    return lower, upper

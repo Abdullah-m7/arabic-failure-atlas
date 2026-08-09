@@ -6,7 +6,7 @@
 |---|---|---|
 | SCI-1 | FAIL | 2 |
 | SCI-2 | FAIL | 1 |
-| SCI-3 | PASS | 0 |
+| SCI-3 | FAIL | 8 |
 | SCI-4 | PASS | 0 |
 | SCI-5 | FAIL | 11 |
 | SCI-6 | FAIL | 1 |
@@ -23,6 +23,16 @@
 
 ## SCI-2
 - delta sentence without bracketed CI: The largest per-mechanism score shift was 0.05, inside the pre-set 0.10 confound
+
+## SCI-3
+- 'flawless'
+- 'flawless'
+- 'perfect'
+- 'perfect'
+- 'perfect'
+- 'perfect'
+- 'solves'
+- 'solves'
 
 ## SCI-5
 - refs.bib TODO-verify entries: 11

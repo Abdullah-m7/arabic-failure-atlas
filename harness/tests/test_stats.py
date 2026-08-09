@@ -31,3 +31,11 @@ def test_holm_bonferroni():
     assert abs(adj["c"] - 0.06) < 1e-12          # 2 * 0.03
     assert abs(adj["b"] - 0.06) < 1e-12          # monotonicity: max(0.04, 0.06)
     assert all(0 <= v <= 1 for v in adj.values())
+
+
+def test_clopper_pearson_reference_values():
+    from atlas.stats import clopper_pearson
+    for k, n, lo_ref, hi_ref in [(10, 10, 0.6915, 1.0), (0, 10, 0.0, 0.3085),
+                                 (9, 10, 0.5550, 0.9975), (8, 10, 0.4439, 0.9748)]:
+        lo, hi = clopper_pearson(k, n)
+        assert abs(lo - lo_ref) < 5e-4 and abs(hi - hi_ref) < 5e-4, (k, n, lo, hi)

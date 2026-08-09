@@ -22,7 +22,9 @@ REPO = Path(__file__).resolve().parents[2]
 
 CAUSAL_VERBS = ["proves", "demonstrates conclusively", "causes"]
 OVERCLAIMS = ["all closed", "state-of-the-art", "first ever", "guarantees",
-              "solves the"]
+              # external-review prep pass additions:
+              "flawless", "perfect", "solves", "eliminates", "definitively",
+              "unprecedented"]
 BANNED = ["delve", "showcase", "leverage", "tapestry", "pivotal", "crucially",
           "notably", "importantly", "arguably", "holistic", "intricate",
           "underscores", "testament to", "moreover", "furthermore",

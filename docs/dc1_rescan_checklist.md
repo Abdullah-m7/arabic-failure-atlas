@@ -23,6 +23,14 @@ Coverage-driven (mechanism × domain):
 - [ ] Eastern Arabic numerals LLM
 - [ ] agent failure taxonomy (2026 onward — orthogonal-axis line)
 
+Pre-LLM prior art (external-review prep — the calendar mechanism has a
+pre-neural literature; the novelty claim must be scoped against it):
+- [ ] Arabic temporal expression normalization / extraction (TempEval-era)
+- [ ] Arabic TimeML / TIMEX annotation
+- [ ] Hijri-Gregorian conversion algorithms (Umm al-Qura computational
+      treatments; tabular vs observational calendar literature)
+- [ ] Islamic calendar NLP / date normalization systems
+
 Name-collision re-check for the chosen public name:
 - [ ] exact-name search on arXiv, GitHub, HuggingFace, Google
 - [ ] re-check "AgentAtlas" successors / similar names
