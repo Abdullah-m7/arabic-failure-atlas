@@ -54,7 +54,7 @@ WHITELIST_PATTERNS = [
 # Literature-owned sentences: numerals in a sentence carrying one of these
 # bracketed cite tokens are refs-bound (claims ledger), not numbers.json-bound.
 CITE_RE = re.compile(
-    r"\[(?:P\d|S\d|MLCL|MAST|AgentErrorBench|ToolScan|AgentHallu|Aegis|AgentAtlas)"
+    r"\[(?:P\d|S\d|MLCL|MAST)"
     r"\b[^\]]*\]")
 
 
