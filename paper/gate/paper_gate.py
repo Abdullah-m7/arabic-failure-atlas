@@ -48,6 +48,7 @@ WHITELIST_PATTERNS = [
     r"\(\d\)",                             # parenthesized enumerations (1)..(9)
     r"\b\d{1,3},\d{3}\b",                  # thousands-separated (1,600) kept whole
     r"\bn\s*=\s*\d+",                      # statistical n = k phrasing
+    r"U\+[0-9A-Fa-f]{4,6}",                # Unicode codepoint notation (D33 addendum)
 ]
 
 # Literature-owned sentences: numerals in a sentence carrying one of these
@@ -135,7 +136,10 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
         re.IGNORECASE)
     viol = []
     for s in sents:
-        if delta_near_num.search(s) and not ("[" in s and "]" in s):
+        scrubbed = s
+        for pat in WHITELIST_PATTERNS:  # ids like R1/H2 are never delta values
+            scrubbed = re.sub(pat, " ", scrubbed)
+        if delta_near_num.search(scrubbed) and not ("[" in s and "]" in s):
             viol.append(f"delta sentence without bracketed CI: {s[:80]}")
     for m in re.finditer(r"\bsignificant", paper, re.IGNORECASE):
         window = paper[m.start(): m.end() + 40]

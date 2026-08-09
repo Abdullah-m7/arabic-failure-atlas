@@ -358,3 +358,10 @@ to forbid discussing method. Calibration of paper tooling only;
 the frozen scorer is untouched."
 Implementation: adjacency = a digit within 40 characters of the delta
 token on either side, not crossing a sentence-internal period/semicolon.
+
+**D33-addendum — same pass:** two refinements after the first v4 run, both
+within D33's stated intent: (1) SCI-2's adjacency detector scrubs the SCI-1
+whitelist first — ids like R1/H2 and section numbers are "never claims" by
+the gate's own definition, so a digit inside them cannot make a delta
+"reported"; (2) SCI-1 whitelists Unicode codepoint notation (U+0660),
+introduced by v4's encoding-safe rewrite of the numerals range.
