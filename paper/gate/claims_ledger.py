@@ -154,6 +154,10 @@ def build_ledger(paper: str, numbers: dict | None = None,
         # claim-text substring so they survive regeneration
         for so in (signoffs if signoffs is not None else _load_signoffs()):
             if so["match"] in s:
+                if so["status"] == "INTERPRETIVE":  # D34 constraints
+                    assert not toks, f"D34: INTERPRETIVE on numeral row: {s[:60]}"
+                    assert "\u00a7" in so["source"] or "SS" in so["source"], \
+                        f"D34: INTERPRETIVE without section ref: {so['match']}"
                 status, source = so["status"], so["source"]
                 break
         rows.append(f"| {claim} | {source.replace('|', '/')} | {status} |")
@@ -164,6 +168,8 @@ def build_ledger(paper: str, numbers: dict | None = None,
              "PENDING-REFS = cite-bound, bib entry still TODO-verify.",
              "VERIFIED-BY-DOC = grounded in a repository document (cycle-6",
              "sign-offs; path + anchor in the source column).",
+             "INTERPRETIVE = reads the evidence of a named section (D34);",
+             "non-blocking, forbidden on numeral rows.",
              "MANUAL = needs research-lead line-by-line sign-off.",
              "Gate SCI-7 passes only when no UNVERIFIED/MANUAL/PENDING-REFS",
              "rows remain.", "",
@@ -187,7 +193,8 @@ def main(argv=None) -> int:
     (REPO / "paper" / "claims_ledger.md").write_text(ledger, encoding="utf-8")
     counts = {st: ledger.count(f"| {st} |")
               for st in ("VERIFIED", "VERIFIED-BY-REFERENCE", "VERIFIED-BY-DOC",
-                         "PENDING-REFS", "MANUAL", "UNVERIFIED")}
+                         "INTERPRETIVE", "PENDING-REFS", "MANUAL",
+                         "UNVERIFIED")}
     print(f"wrote paper/claims_ledger.md ({sum(counts.values())} rows): "
           + ", ".join(f"{k}={v}" for k, v in counts.items() if v))
     return 0

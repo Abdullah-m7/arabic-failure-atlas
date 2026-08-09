@@ -365,3 +365,15 @@ whitelist first — ids like R1/H2 and section numbers are "never claims" by
 the gate's own definition, so a digit inside them cannot make a delta
 "reported"; (2) SCI-1 whitelists Unicode codepoint notation (U+0660),
 introduced by v4's encoding-safe rewrite of the numerals range.
+
+**D34 — 2026-08-06 — Ledger status INTERPRETIVE (verbatim as issued):**
+"D34: The claims ledger gains status INTERPRETIVE for argumentative
+sentences that read the evidence rather than assert a fact or figure.
+Two constraints: an INTERPRETIVE row must name the section whose
+evidence it reads, and NO row containing a numeral may take this
+status. SCI-7 does not block on INTERPRETIVE rows. This completes the
+ledger's design for a claim class it never covered; it is not a
+relaxation of provenance for factual claims."
+Implementation: both constraints are enforced mechanically at ledger
+build time (an INTERPRETIVE sign-off on a numeral-bearing row, or one
+whose source names no section, aborts the build).
