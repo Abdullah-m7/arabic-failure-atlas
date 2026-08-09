@@ -142,6 +142,7 @@ def main() -> None:
     assert used <= labels, f"unresolved cite tags: {used - labels}"
 
     tex = (
+        "\\pdfoutput=1\n"  # force arXiv AutoTeX onto pdflatex
         "\\documentclass[11pt]{article}\n"
         "\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n"
         "\\usepackage{cmap}\n"
