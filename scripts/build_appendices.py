@@ -116,22 +116,15 @@ def main() -> None:
         "not reproduced here to keep this document encoding-safe for the "
         "submission toolchain.",
         "",
-        "## Appendix C — Chat-surface probe (designed, unexecuted)",
+        "## Appendix C — DC3 scorer audit: full adjudication",
         "",
-        "[RESEARCH-LEAD INSERT: the probe design document is not present "
-        "in-repository as of assembly; this appendix must receive it before "
-        "submission or the corresponding sentence in the Limitations must "
-        "be scoped to the harness plan.]",
-        "",
-        "## Appendix D — DC3 scorer audit: full adjudication",
-        "",
-        "### D.1 Inter-annotator anatomy (v1 report, reproduced in full)",
+        "### C.1 Inter-annotator anatomy (v1 report, reproduced in full)",
         "",
         "```",
         dc3v1.strip(),
         "```",
         "",
-        "### D.2 Re-gate after the pre-committed calibration (v2 report, "
+        "### C.2 Re-gate after the pre-committed calibration (v2 report, "
         "reproduced in full)",
         "",
         "```",

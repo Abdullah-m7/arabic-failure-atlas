@@ -127,9 +127,9 @@
       "authority": "research lead, gate cycle 7"
     },
     {
-      "match": "Appendix D reproduces the DC3 report in full",
+      "match": "Appendix C reproduces the DC3 report in full",
       "status": "VERIFIED-BY-DOC",
-      "source": "paper/appendices.md Appendix D reproduces audit/DC3_REPORT.md and DC3_REPORT_v2.md verbatim (build asserted against numbers.json audit block by scripts/build_appendices.py)",
+      "source": "paper/appendices.md Appendix C reproduces audit/DC3_REPORT.md and DC3_REPORT_v2.md verbatim (build asserted against numbers.json audit block by scripts/build_appendices.py)",
       "authority": "appendix assembly, submission day"
     },
     {

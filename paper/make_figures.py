@@ -127,15 +127,16 @@ def f3_forensics():
         bottoms = [b + y for b, y in zip(bottoms, ys)]
     for i, arm in enumerate(arms):
         md = get("forensics", arm, "mean_err_days")
-        ax.text(i, bottoms[i] + 0.25, f"mean |err| = {md:.1f} d",
-                ha="center", fontsize=8)
+        # stagger annotation heights so they clear the legend and each other
+        ax.text(i, bottoms[i] + 0.25 + (i % 2) * 0.9,
+                f"mean |err| = {md:.1f} d", ha="center", fontsize=8)
     ax.set_xticks(range(len(arms)))
     ax.set_xticklabels([ARM_LABELS.get(a, a) for a in arms], fontsize=8)
     ax.set_ylabel("failed hijri_ar records (of 10)")
     ax.set_title("F3 — Hijri forensics: failure classes per arm "
                  "(+ mean |error-days| over dated misses)", fontsize=9)
-    ax.legend(frameon=False, fontsize=7.5, ncol=2)
-    style(ax, ylim=(0, 12.5))
+    ax.legend(frameon=False, fontsize=7.5, ncol=3, loc="upper left")
+    style(ax, ylim=(0, 13.8))
     save(fig, "F3_hijri_forensics")
 
 

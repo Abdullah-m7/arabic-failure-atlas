@@ -11,15 +11,15 @@
 | SCI-5 | PASS | 0 |
 | SCI-6 | PASS | 0 |
 | SCI-7 | PASS | 0 |
-| STY-1 | PASS | 0.9 |
+| STY-1 | PASS | 0.8 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |
 | STY-4 | PASS | 0 |
 | STY-5 | PASS | 0 |
 
 ## STY-1
-- em-dash/1000w = 0.9 (max 5)
-- semicolon/1000w = 3.0 (max 4)
+- em-dash/1000w = 0.8 (max 5)
+- semicolon/1000w = 2.9 (max 4)
 
 ## STY-3
 - inversion-family matches: 3 (max 3)
