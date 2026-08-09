@@ -127,12 +127,16 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
     checks["SCI-1"] = {"passed": not orphans, "count": len(orphans),
                        "details": orphans[:25]}
 
-    # SCI-2 stats discipline
+    # SCI-2 stats discipline (D33: fire only on sentences REPORTING a numeric
+    # delta value — a delta symbol/name adjacent to a number; methodology
+    # prose that merely discusses deltas is exempt)
+    delta_near_num = re.compile(
+        r"(?:Δ\S*|\bdeltas?\b)[^.;]{0,40}?\d|\d[^.;]{0,40}?(?:Δ\S*|\bdeltas?\b)",
+        re.IGNORECASE)
     viol = []
     for s in sents:
-        if re.search(r"(?:Δ|\bdelta\b)", s, re.IGNORECASE) and re.search(r"\d", s):
-            if not ("[" in s and "]" in s):
-                viol.append(f"delta sentence without bracketed CI: {s[:80]}")
+        if delta_near_num.search(s) and not ("[" in s and "]" in s):
+            viol.append(f"delta sentence without bracketed CI: {s[:80]}")
     for m in re.finditer(r"\bsignificant", paper, re.IGNORECASE):
         window = paper[m.start(): m.end() + 40]
         if "holm" not in window.lower():

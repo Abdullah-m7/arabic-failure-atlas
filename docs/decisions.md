@@ -348,3 +348,13 @@ the minus sign sits outside the prose token). Final v1.1 counts on
 draft_v2: SCI-1 34->2 (both survivors are a real catch: the 53.1%/249
 sentence lost its [P2] cite in the v2 rewrite), SCI-7 -> 29 (49 VERIFIED,
 4 PENDING-REFS, 25 MANUAL); all other checks as in the D32 table.
+
+**D33 — 2026-08-06 — SCI-2 calibration (verbatim as issued):**
+"D33: SCI-2 fires only on sentences REPORTING a numeric delta value
+(a delta symbol/name adjacent to a number). Sentences that describe
+statistical methodology without reporting a value are exempt.
+Rationale: the check exists to stop unqualified numeric claims, not
+to forbid discussing method. Calibration of paper tooling only;
+the frozen scorer is untouched."
+Implementation: adjacency = a digit within 40 characters of the delta
+token on either side, not crossing a sentence-internal period/semicolon.
