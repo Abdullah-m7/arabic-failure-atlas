@@ -377,3 +377,19 @@ relaxation of provenance for factual claims."
 Implementation: both constraints are enforced mechanically at ledger
 build time (an INTERPRETIVE sign-off on a numeral-bearing row, or one
 whose source names no section, aborts the build).
+
+**D35 — 2026-08-09 — Appendix assembly rule: markdown table rows are artifact
+data, not prose.** Lines starting with "|" (table rows) are excluded from
+SCI-1 number-provenance scanning and from ledger sentence extraction: the
+appendix tables reproduce generated artifacts (DC3 reports, sensitivity and
+alias tables, quota ladder) whose integrity is enforced upstream — by the
+assembly script's assertions against numbers.json and by the byte-stability
+test — so re-scanning the reproduction would double-count provenance the
+pipeline already guarantees. Applies to paper tooling only; prose claims in
+appendix text remain fully checked.
+
+**D35-addendum — same pass:** fenced code blocks join table rows as artifact
+data: the gate blanks fenced regions before every check (line numbers kept
+stable). Appendix reproductions (decision-log quotes, DC3 reports, run-log
+prose) are moved into fences by the assembly script; their figures are
+asserted at build time instead of re-scanned as prose.

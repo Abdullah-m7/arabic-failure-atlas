@@ -1,6 +1,6 @@
-# Paper Quality Gate Report — `paper/draft_v4.md`
+# Paper Quality Gate Report — `paper/submission_full.md`
 
-**OVERALL: FAIL**
+**OVERALL: PASS**
 
 | check | result | count |
 |---|---|---|
@@ -10,19 +10,16 @@
 | SCI-4 | PASS | 0 |
 | SCI-5 | PASS | 0 |
 | SCI-6 | PASS | 0 |
-| SCI-7 | FAIL | 1 |
-| STY-1 | PASS | 0.2 |
+| SCI-7 | PASS | 0 |
+| STY-1 | PASS | 0.9 |
 | STY-2 | PASS | 0 |
 | STY-3 | PASS | 3 |
 | STY-4 | PASS | 0 |
 | STY-5 | PASS | 0 |
 
-## SCI-7
-- MANUAL ledger rows: 1
-
 ## STY-1
-- em-dash/1000w = 0.2 (max 5)
-- semicolon/1000w = 2.4 (max 4)
+- em-dash/1000w = 0.9 (max 5)
+- semicolon/1000w = 3.0 (max 4)
 
 ## STY-3
 - inversion-family matches: 3 (max 3)

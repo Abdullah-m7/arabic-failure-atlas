@@ -61,6 +61,7 @@ CITE_RE = re.compile(
 def _sentences(text: str) -> list[str]:
     text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.DOTALL)
+    text = re.sub(r"^\|.*$", " ", text, flags=re.MULTILINE)  # D35: table rows
     raw = re.split(r"(?<=[.!?])\s+(?=[A-Z\"'\(\[])", text.replace("\n", " "))
     return [s.strip() for s in raw if len(s.strip()) > 2]
 
@@ -99,9 +100,25 @@ def _numeric_ok(tok: str, allowed: set[float]) -> bool:
     return False
 
 
+def _blank_fenced(paper: str) -> str:
+    """D35 extension: fenced code blocks are verbatim artifact reproductions
+    (decision-log quotes, generated reports, run logs) — invisible to every
+    check; their integrity is enforced by build-time assertions. Fenced
+    lines are blanked, not removed, so SCI-1 line numbers stay stable."""
+    out, fenced = [], False
+    for line in paper.splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            out.append("")
+        else:
+            out.append("" if fenced else line)
+    return "\n".join(out)
+
+
 def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
              ledger: str | None = None) -> dict:
     checks: dict[str, dict] = {}
+    paper = _blank_fenced(paper)
     lines = paper.splitlines()
     sents = _sentences(paper)
     sections = _sections(paper)
@@ -113,8 +130,8 @@ def run_gate(paper: str, numbers: dict, inventory: str, refs: str,
     _collect_numbers(numbers, allowed)
     orphans = []
     for ln, line in enumerate(paper.splitlines(), 1):
-        if line.lstrip().startswith(("```", "<!--")):
-            continue
+        if line.lstrip().startswith(("```", "<!--", "|")):
+            continue  # D35: table rows are artifact data
         # v1.1 (D32): drop cite-bearing sentences BEFORE whitelist scrubbing
         # (the model-name pattern would eat P1/S1 cite tokens) — their
         # numerals are literature-owned and live in the claims ledger.

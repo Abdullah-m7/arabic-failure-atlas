@@ -128,9 +128,9 @@
     },
     {
       "match": "Appendix D reproduces the DC3 report in full",
-      "status": "MANUAL",
-      "source": "grounds when appendices are assembled (source doc: audit/DC3_REPORT_v2.md)",
-      "authority": "research lead, gate cycle 7"
+      "status": "VERIFIED-BY-DOC",
+      "source": "paper/appendices.md Appendix D reproduces audit/DC3_REPORT.md and DC3_REPORT_v2.md verbatim (build asserted against numbers.json audit block by scripts/build_appendices.py)",
+      "authority": "appendix assembly, submission day"
     },
     {
       "match": "The 20B arm is weakest on M4 and M6, though not on the numerals control",

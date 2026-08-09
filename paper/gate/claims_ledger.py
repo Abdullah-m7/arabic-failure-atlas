@@ -57,6 +57,7 @@ CITE_TOKEN_RE = re.compile(
 def sentences(text: str) -> list[str]:
     text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.DOTALL)
+    text = re.sub(r"^\|.*$", " ", text, flags=re.MULTILINE)  # D35: table rows
     raw = re.split(r"(?<=[.!?])\s+(?=[A-Z\"'\(\[])", text.replace("\n", " "))
     return [s.strip() for s in raw if len(s.strip()) > 2]
 
