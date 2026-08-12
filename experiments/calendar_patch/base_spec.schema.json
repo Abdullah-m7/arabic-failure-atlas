@@ -7,7 +7,7 @@
     "set_id": { "type": "string", "pattern": "^CP-[0-9]{3}$" },
     "scenario_family": {
       "enum": [
-        "appointment", "travel", "scheduled_payment",
+        "appointment", "travel", "reservation",
         "delivery", "maintenance", "document_filing"
       ]
     },
