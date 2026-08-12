@@ -1,0 +1,14 @@
+{
+  "study": "calendar-patch-v1",
+  "heldout_repository": "al3obdi/arabic-failure-atlas-calendar-patch-heldout",
+  "heldout_branch": "study/calendar-patch-v1-heldout",
+  "private_spec_path": "private/specs.jsonl",
+  "private_spec_sha256": "eadd453ac19ea1e0f6b60ea4ce383d43107a1444345f15f25871487581877683",
+  "n_base_specs": 30,
+  "parent_branch": "research/calendar-patch-civic-grounding",
+  "parent_commit_at_binding": "d78ebda520058135cb297eaff29afe491eba7877",
+  "live_canary_generated": false,
+  "generated_task_file_frozen": false,
+  "live_execution_started": false,
+  "note": "This file binds the public experiment code to the private held-out base-spec evidence by repository/path/hash only. It contains no held-out task text or canary."
+}
