@@ -21,6 +21,7 @@ from atlas.calendar_patch_verdict import (  # noqa: E402
 from atlas.run import git_commit_hash  # noqa: E402
 
 EXPERIMENT = "calendar-patch-v1"
+PREFLIGHT_PURPOSE = "non-diagnostic endpoint/tool-call preflight"
 
 
 def _inside_repo(path: Path) -> bool:
@@ -37,6 +38,44 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _validate_preflight_artifact(path: Path, meta: dict) -> str:
+    if not path.exists():
+        raise SystemExit(f"missing frozen preflight artifact: {path}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid preflight JSON: {path}: {exc}") from exc
+
+    if payload.get("experiment") != EXPERIMENT:
+        raise SystemExit("preflight artifact is not Calendar Patch v1")
+    if payload.get("purpose") != PREFLIGHT_PURPOSE:
+        raise SystemExit("preflight artifact has an unexpected purpose")
+    if payload.get("git_commit") != meta.get("git_commit"):
+        raise SystemExit("preflight artifact git commit differs from the frozen execution commit")
+    if payload.get("frozen_roster") != meta.get("models"):
+        raise SystemExit("preflight roster/config differs from the frozen execution roster")
+
+    rows = payload.get("models") or {}
+    expected_names = [model["name"] for model in meta.get("models", [])]
+    if set(rows) != set(expected_names):
+        raise SystemExit("preflight model rows do not match the frozen execution roster")
+    unavailable = [name for name in expected_names if not rows.get(name, {}).get("callable")]
+    if unavailable:
+        raise SystemExit(
+            "frozen execution references a preflight with unavailable arms: "
+            + ", ".join(unavailable)
+        )
+
+    digest = _sha256(path)
+    if not meta.get("preflight_sha256"):
+        raise SystemExit("execution metadata is missing preflight_sha256")
+    if digest != meta.get("preflight_sha256"):
+        raise SystemExit(
+            "preflight SHA mismatch: execution is not bound to the supplied preflight artifact"
+        )
+    return digest
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -68,6 +107,7 @@ def load_records(
         "seed": meta.get("seed"),
         "experiment": meta.get("experiment"),
         "task_sha256": meta.get("task_sha256"),
+        "preflight_sha256": meta.get("preflight_sha256"),
     }
     out = {}
     any_record = False
@@ -106,6 +146,8 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tasks", required=True, type=Path)
     parser.add_argument("--raw", required=True, type=Path)
+    parser.add_argument("--preflight", type=Path,
+                        help="same frozen non-diagnostic preflight JSON used at execution")
     parser.add_argument("--out", required=True, type=Path,
                         help="output directory for summary.json + summary.md")
     parser.add_argument("--expected-sets", type=int, default=30)
@@ -114,6 +156,10 @@ def main(argv=None) -> int:
 
     if not args.allow_inrepo_fixture and _inside_repo(args.out):
         raise SystemExit("live Calendar Patch analysis must remain outside the repo until freeze")
+    if not args.allow_inrepo_fixture and args.preflight is None:
+        raise SystemExit("live Calendar Patch scoring requires --preflight")
+    if not args.allow_inrepo_fixture and _inside_repo(args.preflight):
+        raise SystemExit("live preflight artifact must stay outside arabic-failure-atlas")
     if not args.allow_inrepo_fixture and args.expected_sets != 30:
         raise SystemExit("live Calendar Patch v1 is pre-registered at exactly 30 sets")
     if not args.allow_inrepo_fixture:
@@ -139,6 +185,10 @@ def main(argv=None) -> int:
             "scoring commit differs from execution commit; checkout the exact execution commit"
         )
 
+    preflight_sha = meta.get("preflight_sha256")
+    if not args.allow_inrepo_fixture:
+        preflight_sha = _validate_preflight_artifact(args.preflight, meta)
+
     expected_models = [model["name"] for model in meta.get("models", [])]
     if not expected_models or len(expected_models) != len(set(expected_models)):
         raise SystemExit("run metadata contains an empty or duplicate model roster")
@@ -162,6 +212,7 @@ def main(argv=None) -> int:
         "git_commit": meta.get("git_commit"),
         "seed": meta.get("seed"),
         "task_sha256": current_task_sha,
+        "preflight_sha256": preflight_sha,
         "models": expected_models,
         "registered_design": design,
     }
