@@ -97,7 +97,7 @@ class OllamaNativeAdapter(Adapter):
                     {
                         "role": "tool",
                         "tool_name": fn.get("name", ""),
-                        "content": canned_tool_output(fn.get("name", ""), task),
+                        "content": canned_tool_output(fn.get("name", ""), task, args),
                     }
                 )
         else:

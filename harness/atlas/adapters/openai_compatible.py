@@ -115,7 +115,7 @@ class OpenAICompatibleAdapter(Adapter):
                     {
                         "role": "tool",
                         "tool_call_id": tc.get("id", ""),
-                        "content": canned_tool_output(fn.get("name", ""), task),
+                        "content": canned_tool_output(fn.get("name", ""), task, args),
                     }
                 )
         else:
@@ -162,7 +162,9 @@ class OpenAICompatibleAdapter(Adapter):
                     output_error = f"unparseable <tool_call> JSON: {exc}"
                     continue
                 pred_calls.append({"name": name, "args": args})
-                tool_msgs.append(f"Tool {name} returned: {canned_tool_output(name, task)}")
+                tool_msgs.append(
+                    f"Tool {name} returned: {canned_tool_output(name, task, args)}"
+                )
             messages.append({"role": "user", "content": "\n".join(tool_msgs) or "Tool output unavailable."})
         else:
             output_error = output_error or f"no final answer after {MAX_TOOL_ROUNDS} tool rounds"

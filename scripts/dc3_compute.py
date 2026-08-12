@@ -20,6 +20,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 RETURNS = REPO / "audit" / "returns"
 SEALED = REPO / "docs" / "audit_kit" / "SEALED_scorer_verdicts.jsonl"
+AUDIT_SAMPLE = REPO / "docs" / "audit_kit" / "audit_sample.jsonl"
 REPORT = REPO / "audit" / "DC3_REPORT.md"
 REPORT_V2 = REPO / "audit" / "DC3_REPORT_v2.md"
 
@@ -54,33 +55,41 @@ def _load_returns() -> tuple[list[dict], list[dict], list[dict]]:
 
 
 def rescore_v2() -> list[int]:
-    """Re-derive the 50 audit scorer verdicts from raw through the CURRENT
-    (iteration-2) scoring code — same records, same arms as the sealed file."""
+    """Re-derive the 50 audit scorer verdicts through the CURRENT
+    (iteration-2) scoring code from the committed blind audit evidence.
+
+    ``audit_sample.jsonl`` is the scorer-verdict-free projection of the exact
+    sampled raw records created by ``make_audit_sample.py`` before unsealing.
+    It contains the model calls/final text needed for re-scoring, so DC3 does
+    not depend on the untracked ``results/raw/`` directories in a fresh clone.
+    The audit-id/model/task tuple is asserted one-to-one against the sealed
+    scorer file before any verdict is recomputed.
+    """
     sys.path.insert(0, str(REPO / "harness"))
     from atlas.scoring import score_task
 
     s_rows = _rows(SEALED)
-    manifest = json.loads((REPO / "paper" / "run_manifest.json").read_text(encoding="utf-8"))
-    raw_dirs = [REPO / "results" / "raw" / ts for ts in manifest.values()
-                if isinstance(ts, str) and ts]
+    audit_rows = _rows(AUDIT_SAMPLE)
+    assert len(audit_rows) == len(s_rows) == 50, "audit sample/sealed length drift"
+    for audit, sealed in zip(audit_rows, s_rows):
+        assert (
+            audit.get("audit_id"), audit.get("model"), audit.get("task_id")
+        ) == (
+            sealed.get("audit_id"), sealed.get("model"), sealed.get("task_id")
+        ), "audit sample/sealed identity drift"
+
     tasks = {}
     for p in (REPO / "tasks" / "pilot").glob("*.jsonl"):
         for line in p.read_text(encoding="utf-8").splitlines():
             t = json.loads(line)
             tasks[t["task_id"]] = t
-    raw_index = {}
-    for d in raw_dirs:
-        for f in d.glob("*.jsonl"):
-            if f.name.startswith("EXCLUDED"):
-                continue
-            for line in f.read_text(encoding="utf-8").splitlines():
-                r = json.loads(line)
-                raw_index[(f.stem, r.get("task_id"))] = r
+
     verdicts = []
-    for row in s_rows:
-        raw = raw_index[(row["model"], row["task_id"])]
-        sc = score_task(tasks[row["task_id"]], raw["pred_calls"],
-                        raw.get("final_text") or "")
+    for row in audit_rows:
+        task_id = row["task_id"]
+        assert task_id in tasks, f"audit task missing from frozen pilot tasks: {task_id}"
+        sc = score_task(tasks[task_id], row.get("pred_calls") or [],
+                        row.get("final_text") or "")
         verdicts.append(int(sc["pass"]))
     return verdicts
 
@@ -139,8 +148,8 @@ def compute() -> dict:
 
 def compute_v2() -> dict:
     """v2 adjudication per D30/D31: same 50 returns, same D29 gate rule,
-    scorer verdicts re-derived from raw through the iteration-2 scorer.
-    Adds the v1 baseline and the fixed/new-miss deltas."""
+    scorer verdicts re-derived from the committed blind audit evidence through
+    the iteration-2 scorer. Adds the v1 baseline and fixed/new-miss deltas."""
     a_rows, b_rows, s_rows = _load_returns()
     v1 = _adjudicate(a_rows, b_rows, [int(r["scorer_pass"]) for r in s_rows])
     s2 = rescore_v2()
@@ -222,8 +231,9 @@ def to_markdown_v2(r: dict) -> str:
         "# DC3 REPORT v2 — re-gate after scorer iteration 2 (per D29/D30/D31)",
         "",
         "Same 50 returns, same D29 consensus-gate rule; scorer verdicts",
-        "re-derived from raw through the iteration-2 scorer (D31: M6 call-set",
-        "semantics amended; families (a)/(c) not spent — no evidence).",
+        "re-derived from the committed blind audit sample through the iteration-2 scorer",
+        "(the sample is the scorer-verdict-free projection of the selected raw records).",
+        "D31: M6 call-set semantics amended; families (a)/(c) not spent — no evidence.",
         f"v1 baseline: gate {r['gate_v1']:.4f} (audit/DC3_REPORT.md).",
         "",
         "## Scorer verdict changes v1 -> v2 (all 50 records)",
