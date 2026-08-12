@@ -42,10 +42,7 @@ class OpenAICompatibleAdapter(Adapter):
         key_env = config.get("api_key_env")
         self.api_key = os.environ.get(key_env, "") if key_env else config.get("api_key", "")
         self.timeout = config.get("timeout_s", 120)
-        # Per-model extra request params merged verbatim into every request body
-        # (e.g. Ollama's think: true/false, reasoning effort). See decisions D20.
         self.extra_body = dict(config.get("extra_body") or {})
-        # Free-tier pacing: sleep before every request (seconds).
         self.inter_call_delay_s = config.get("inter_call_delay_s", 0)
 
     def _post(self, payload: dict) -> dict:
@@ -66,7 +63,6 @@ class OpenAICompatibleAdapter(Adapter):
         if resp.status_code >= 500 or resp.status_code in (408, 429):
             raise TransportError(f"HTTP {resp.status_code}: {resp.text[:500]}")
         if resp.status_code != 200:
-            # 4xx other than throttling is a configuration problem, not retryable.
             raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:500]}")
         return resp.json()
 
@@ -75,10 +71,9 @@ class OpenAICompatibleAdapter(Adapter):
             return self._run_prompt_style(task)
         return self._run_native(task)
 
-    # -- native function calling ------------------------------------------------
     def _run_native(self, task: dict) -> AdapterResult:
         tools = [
-            {"type": "function", "function": t}  # {name, description, parameters}
+            {"type": "function", "function": t}
             for t in task["tools"]
         ]
         messages = [{"role": "system", "content": task["system_prompt"]}] + [
@@ -115,7 +110,7 @@ class OpenAICompatibleAdapter(Adapter):
                     {
                         "role": "tool",
                         "tool_call_id": tc.get("id", ""),
-                        "content": canned_tool_output(fn.get("name", ""), task),
+                        "content": canned_tool_output(fn.get("name", ""), task, args),
                     }
                 )
         else:
@@ -130,7 +125,6 @@ class OpenAICompatibleAdapter(Adapter):
             output_error=output_error,
         )
 
-    # -- prompt-based fallback --------------------------------------------------
     def _run_prompt_style(self, task: dict) -> AdapterResult:
         system = task["system_prompt"] + PROMPT_STYLE_INSTRUCTIONS.format(
             tools=json.dumps(task["tools"], ensure_ascii=False)
@@ -162,7 +156,9 @@ class OpenAICompatibleAdapter(Adapter):
                     output_error = f"unparseable <tool_call> JSON: {exc}"
                     continue
                 pred_calls.append({"name": name, "args": args})
-                tool_msgs.append(f"Tool {name} returned: {canned_tool_output(name, task)}")
+                tool_msgs.append(
+                    f"Tool {name} returned: {canned_tool_output(name, task, args)}"
+                )
             messages.append({"role": "user", "content": "\n".join(tool_msgs) or "Tool output unavailable."})
         else:
             output_error = output_error or f"no final answer after {MAX_TOOL_ROUNDS} tool rounds"
