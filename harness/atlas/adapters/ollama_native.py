@@ -85,7 +85,7 @@ class OllamaNativeAdapter(Adapter):
             for tc in tool_calls:
                 fn = tc.get("function", {}) or {}
                 args = fn.get("arguments") or {}
-                if isinstance(args, str):  # some builds return JSON strings
+                if isinstance(args, str):
                     import json as _json
                     try:
                         args = _json.loads(args)
@@ -97,7 +97,7 @@ class OllamaNativeAdapter(Adapter):
                     {
                         "role": "tool",
                         "tool_name": fn.get("name", ""),
-                        "content": canned_tool_output(fn.get("name", ""), task),
+                        "content": canned_tool_output(fn.get("name", ""), task, args),
                     }
                 )
         else:
