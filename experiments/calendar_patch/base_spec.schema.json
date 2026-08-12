@@ -30,7 +30,7 @@
         "date_arg_key": { "type": "string", "minLength": 1 },
         "args": { "type": "object" }
       },
-      "required": ["name", "args"],
+      "required": ["name", "date_arg_key", "args"],
       "additionalProperties": false
     },
     "tool_outputs": {
