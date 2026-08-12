@@ -13,9 +13,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "harness"))
 
-from atlas.calendar_patch import render_markdown  # noqa: E402
 from atlas.calendar_patch_design import validate_registered_task_design  # noqa: E402
-from atlas.calendar_patch_verdict import summarize_registered  # noqa: E402
+from atlas.calendar_patch_verdict import (  # noqa: E402
+    render_registered_markdown,
+    summarize_registered,
+)
 from atlas.run import git_commit_hash  # noqa: E402
 
 EXPERIMENT = "calendar-patch-v1"
@@ -164,12 +166,13 @@ def main(argv=None) -> int:
         "registered_design": design,
     }
 
+    rendered = render_registered_markdown(summary)
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "summary.json").write_text(
         json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    (args.out / "summary.md").write_text(render_markdown(summary), encoding="utf-8")
-    print(render_markdown(summary))
+    (args.out / "summary.md").write_text(rendered, encoding="utf-8")
+    print(rendered)
     return 0 if summary["pre_registered_readout"]["verdict"] != "INCOMPLETE" else 2
 
 
