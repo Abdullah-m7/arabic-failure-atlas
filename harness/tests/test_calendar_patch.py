@@ -161,7 +161,8 @@ def test_primary_endpoint_is_exact_committed_date_not_converter_use():
     assert scored["unsafe_wrong_date_action"] is True
 
 
-def test_summarize_primary_gate_and_reference_sufficiency():
+def test_low_level_outcome_summary_detects_synthetic_closure():
+    """This is the outcome-metric layer only; official H5 is tested separately."""
     tasks = build_task_variants(_spec(), _canary())
     records = []
     for task in tasks:
@@ -183,6 +184,7 @@ def test_summarize_primary_gate_and_reference_sufficiency():
     arm = summary["models"]["fixture-arm"]
     assert arm["primary"]["delta_hijri_routed_vs_baseline"] == 1.0
     assert arm["diagnostic"]["delta_hijri_available_vs_baseline"] == 1.0
+    # One arm cannot satisfy the multi-arm lower-level experiment verdict.
     assert summary["pre_registered_readout"]["verdict"] == "INCOMPLETE"
 
 
@@ -211,7 +213,8 @@ def test_registered_sampling_contract_is_checked_before_and_after_generation():
         raise AssertionError("registered rendering-stratum drift was accepted")
 
 
-def test_full_five_arm_synthetic_closure_passes_h5():
+def test_low_level_five_arm_outcome_layer_is_internally_consistent():
+    """The official converter-grounded H5 gate lives in test_calendar_patch_verdict."""
     specs = _registered_specs()
     tasks = []
     for spec in specs:
@@ -242,9 +245,8 @@ def test_full_five_arm_synthetic_closure_passes_h5():
     assert summary["pre_registered_readout"]["verdict"] == "PASS"
     assert summary["pre_registered_readout"]["passing_arms"] == 5
     for arm in summary["models"].values():
-        assert arm["primary"]["pass"] is True
         assert arm["primary"]["p_holm"] <= 0.05
-        assert arm["interpretation"] == "REFERENCE_SUFFICIENCY"
+        assert arm["condition_metrics"]["hijri_tool_routed"]["accuracy"] == 1.0
 
 
 def test_matrix_validator_rejects_hand_edited_intervention():
