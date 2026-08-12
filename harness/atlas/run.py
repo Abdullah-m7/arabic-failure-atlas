@@ -105,11 +105,16 @@ def run_model(model_cfg: dict, tasks: list[dict], out_dir: Path, stamp: dict,
         for task in tasks:
             if task["task_id"] in done:
                 continue
+            # Paper-1 records use `variant`; intervention studies may name the
+            # same experimental axis `condition`. Paper-1 behavior is unchanged.
+            variant = task.get("variant", task.get("condition"))
+            if variant is None:
+                raise ValueError(f"task {task['task_id']} has neither variant nor condition")
             record = {
                 "task_id": task["task_id"],
                 "set_id": task["set_id"],
                 "mechanism": task["mechanism"],
-                "variant": task["variant"],
+                "variant": variant,
                 "model": name,
                 **stamp,
             }
