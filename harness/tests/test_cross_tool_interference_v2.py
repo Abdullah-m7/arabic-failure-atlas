@@ -142,13 +142,84 @@ def test_v2_h6_passes_for_target_interference_and_stable_control():
     for model in ("gpt-oss-20b", "qwen3.5-397b"):
         for condition in ("greg_matched_extra_tool", "greg_converter_available"):
             contrast = summary["models"][model]["contrasts"][condition]
-            # These metrics are derived from binary-count proportions; compare
-            # numerically instead of requiring identical IEEE-754 representations.
             assert contrast["absolute_regression"] == pytest.approx(0.1)
             assert contrast["interference_pass"] is True
             assert contrast["p_holm"] <= 0.05
         assert summary["models"][model]["guard_recovery_fraction"] == pytest.approx(0.5)
         assert summary["models"][model]["guard_recovery_label"] == "SUBSTANTIAL_GATING_RECOVERY"
+
+
+def test_v2_guard_recovery_boundary_is_inclusive_and_below_is_limited():
+    tasks = _tasks()
+
+    boundary = summarize_registered(
+        tasks,
+        {
+            "gpt-oss-20b": _model_records(
+                tasks,
+                "gpt-oss-20b",
+                {"greg_converter_available": 8, "greg_converter_guarded": 4},
+            )
+        },
+    )
+    boundary_row = boundary["models"]["gpt-oss-20b"]
+    assert boundary_row["guard_recovery_fraction"] == pytest.approx(0.5)
+    assert boundary_row["guard_recovery_label"] == "SUBSTANTIAL_GATING_RECOVERY"
+
+    below = summarize_registered(
+        tasks,
+        {
+            "gpt-oss-20b": _model_records(
+                tasks,
+                "gpt-oss-20b",
+                {"greg_converter_available": 8, "greg_converter_guarded": 5},
+            )
+        },
+    )
+    below_row = below["models"]["gpt-oss-20b"]
+    assert below_row["guard_recovery_fraction"] == pytest.approx(3 / 8)
+    assert below_row["guard_recovery_label"] == "LIMITED_GATING_RECOVERY"
+
+
+def test_v2_registered_thresholds_follow_the_80_set_count_grid():
+    tasks = _tasks()
+    records = {
+        "gpt-oss-20b": _model_records(
+            tasks,
+            "gpt-oss-20b",
+            {"greg_matched_extra_tool": 6, "greg_converter_available": 7},
+        ),
+        "qwen3.5-397b": _model_records(
+            tasks,
+            "qwen3.5-397b",
+            {"greg_matched_extra_tool": 7, "greg_converter_available": 7},
+        ),
+        "deepseek-v4-flash-nothink": _model_records(
+            tasks,
+            "deepseek-v4-flash-nothink",
+            {"greg_matched_extra_tool": 2, "greg_converter_available": 2},
+        ),
+    }
+    summary = summarize_registered(tasks, records)
+
+    gpt_matched = summary["models"]["gpt-oss-20b"]["contrasts"]["greg_matched_extra_tool"]
+    gpt_converter = summary["models"]["gpt-oss-20b"]["contrasts"]["greg_converter_available"]
+    assert gpt_matched["absolute_regression"] == pytest.approx(6 / 80)
+    assert gpt_matched["p_holm"] <= 0.05
+    assert gpt_matched["interference_pass"] is False
+    assert gpt_converter["absolute_regression"] == pytest.approx(7 / 80)
+    assert gpt_converter["interference_pass"] is True
+
+    for condition in ("greg_matched_extra_tool", "greg_converter_available"):
+        qwen = summary["models"]["qwen3.5-397b"]["contrasts"][condition]
+        assert qwen["absolute_regression"] == pytest.approx(7 / 80)
+        assert qwen["interference_pass"] is True
+
+    control = summary["models"]["deepseek-v4-flash-nothink"]
+    assert control["negative_control_regressions"]["greg_matched_extra_tool"] == pytest.approx(2 / 80)
+    assert control["negative_control_regressions"]["greg_converter_available"] == pytest.approx(2 / 80)
+    assert control["negative_control_pass"] is True
+    assert summary["pre_registered_readout"]["verdict"] == "FAIL"
 
 
 def test_v2_h6_fails_when_negative_control_is_not_stable():
