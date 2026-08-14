@@ -1,6 +1,6 @@
 # Cross-Tool Interference v2 — Implementation Gate Remediation 001
 
-Status: **pre-held-out implementation-only remediation**.
+Status: **historical pre-held-out implementation-only remediation**.
 
 Classification: **test numeric-comparison precision only; no scientific logic change**.
 
@@ -21,7 +21,7 @@ Only the test assertion was changed:
 - add the existing test dependency `pytest` to the test module;
 - replace exact float equality for the expected 0.1 diagnostic with `pytest.approx(0.1)`.
 
-The production implementation in `harness/atlas/cross_tool_interference_v2.py` is byte-unchanged by this remediation. The following remain unchanged:
+At this remediation stage, the production implementation was byte-unchanged. The following scientific quantities remained unchanged:
 
 - `H6_TOOLSET_EXPANSION_INTERFERENCE`;
 - 80-set design;
@@ -36,12 +36,12 @@ The production implementation in `harness/atlas/cross_tool_interference_v2.py` i
 - fresh-split requirement;
 - no-v1-reuse rules.
 
-## Why this does not alter the scientific test
+## Why this did not alter the scientific test
 
-The v2 outcome proportions lie on a discrete 1/80 grid. The frozen `0.08` interference threshold is not altered and is not at the representational value involved in the failing assertion. The failing test fixture intentionally creates 8/80 = 10% loss and was checking the reported metric value, not defining the pass threshold.
+The failing test fixture intentionally creates 8/80 = 10% loss and was checking the reported metric value, not defining the pass threshold. No held-out data existed for v2, so this remediation was fully pre-call and pre-outcome.
 
-No held-out data exists for v2, so this remediation is fully pre-call and pre-outcome.
+## Later remediation chain
 
-## Required next action
+A second exact-float test assertion was subsequently identified and documented in `IMPLEMENTATION_GATE_REMEDIATION_002.md`. A third clean gate then revealed a production **numeric representation** issue at the preregistered inclusive guarded-recovery boundary; that separate issue is documented and corrected in `IMPLEMENTATION_GATE_REMEDIATION_003.md` without changing the scientific formula or thresholds.
 
-Run the complete clean implementation gate again at the new exact parent HEAD. Do not author the fresh held-out split until full pytest, focused v2 tests, and Python compilation all pass.
+This file remains the historical record of remediation 001 and should not be read as claiming that the later remediation 003 left production representation byte-unchanged.
