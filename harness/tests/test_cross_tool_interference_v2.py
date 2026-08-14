@@ -142,12 +142,12 @@ def test_v2_h6_passes_for_target_interference_and_stable_control():
     for model in ("gpt-oss-20b", "qwen3.5-397b"):
         for condition in ("greg_matched_extra_tool", "greg_converter_available"):
             contrast = summary["models"][model]["contrasts"][condition]
-            # The metric is a binary-count proportion. Compare numerically rather
-            # than requiring identical IEEE-754 representations of 8/80 and 0.1.
+            # These metrics are derived from binary-count proportions; compare
+            # numerically instead of requiring identical IEEE-754 representations.
             assert contrast["absolute_regression"] == pytest.approx(0.1)
             assert contrast["interference_pass"] is True
             assert contrast["p_holm"] <= 0.05
-        assert summary["models"][model]["guard_recovery_fraction"] == 0.5
+        assert summary["models"][model]["guard_recovery_fraction"] == pytest.approx(0.5)
         assert summary["models"][model]["guard_recovery_label"] == "SUBSTANTIAL_GATING_RECOVERY"
 
 
