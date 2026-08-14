@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+import pytest
+
 from atlas.cross_tool_interference_v2 import (
     CONDITIONS,
     CONVERTER_TOOL,
@@ -140,7 +142,9 @@ def test_v2_h6_passes_for_target_interference_and_stable_control():
     for model in ("gpt-oss-20b", "qwen3.5-397b"):
         for condition in ("greg_matched_extra_tool", "greg_converter_available"):
             contrast = summary["models"][model]["contrasts"][condition]
-            assert contrast["absolute_regression"] == 0.1
+            # The metric is a binary-count proportion. Compare numerically rather
+            # than requiring identical IEEE-754 representations of 8/80 and 0.1.
+            assert contrast["absolute_regression"] == pytest.approx(0.1)
             assert contrast["interference_pass"] is True
             assert contrast["p_holm"] <= 0.05
         assert summary["models"][model]["guard_recovery_fraction"] == 0.5
