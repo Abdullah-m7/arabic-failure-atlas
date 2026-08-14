@@ -331,6 +331,42 @@ def _paired_transition(tasks: list[dict], records: list[dict], condition: str) -
     }
 
 
+def _primary_count_delta(metrics: dict, left: str, right: str) -> float:
+    """Return left-minus-right primary accuracy from matched integer counts.
+
+    All registered v2 conditions have the same denominator.  Computing a matched
+    contrast from count differences avoids subtracting two already-rounded binary
+    floating-point proportions at a frozen decision boundary.
+    """
+    left_row = metrics[left]
+    right_row = metrics[right]
+    if left_row["n"] != right_row["n"]:
+        raise ValueError(f"v2 matched-condition denominator drift: {left} vs {right}")
+    n = left_row["n"]
+    if n <= 0:
+        raise ValueError("v2 matched-condition denominator must be positive")
+    return (left_row["primary_pass_n"] - right_row["primary_pass_n"]) / n
+
+
+def _guard_recovery_from_counts(metrics: dict) -> float | None:
+    """Compute guarded recovery from exact matched primary-success counts.
+
+    This is mathematically identical to the preregistered accuracy formula because
+    all four conditions share one denominator.  The count form preserves the
+    inclusive >= 0.50 labeling boundary when the exact ratio is, for example, 4/8.
+    """
+    baseline = metrics["greg_baseline"]
+    available = metrics["greg_converter_available"]
+    guarded = metrics["greg_converter_guarded"]
+    if not (baseline["n"] == available["n"] == guarded["n"]):
+        raise ValueError("v2 guard-recovery denominator drift")
+    denominator_count = baseline["primary_pass_n"] - available["primary_pass_n"]
+    if denominator_count <= 0:
+        return None
+    recovered_count = guarded["primary_pass_n"] - available["primary_pass_n"]
+    return recovered_count / denominator_count
+
+
 def summarize_registered(tasks: list[dict], records_by_model: dict[str, list[dict]], expected_sets: int = EXPECTED_SETS) -> dict:
     validate_task_matrix(tasks, expected_sets=expected_sets)
     expected_task_ids = {task["task_id"] for task in tasks}
@@ -367,17 +403,13 @@ def summarize_registered(tasks: list[dict], records_by_model: dict[str, list[dic
         contrasts = {}
         for condition in PRIMARY_CONTRASTS:
             t = _paired_transition(tasks, records, condition)
-            regression = metrics["greg_baseline"]["primary_accuracy"] - metrics[condition]["primary_accuracy"]
+            regression = _primary_count_delta(metrics, "greg_baseline", condition)
             t["absolute_regression"] = regression
             contrasts[condition] = t
             if model in TARGET_ARMS and complete:
                 raw_ps[(model, condition)] = t["raw_one_sided_p"]
 
-        baseline_acc = metrics["greg_baseline"]["primary_accuracy"]
-        available_acc = metrics["greg_converter_available"]["primary_accuracy"]
-        guarded_acc = metrics["greg_converter_guarded"]["primary_accuracy"]
-        denom = baseline_acc - available_acc
-        guard_recovery = None if denom <= 0 else (guarded_acc - available_acc) / denom
+        guard_recovery = _guard_recovery_from_counts(metrics)
         models[model] = {
             "complete": complete,
             "condition_metrics": metrics,
@@ -388,7 +420,10 @@ def summarize_registered(tasks: list[dict], records_by_model: dict[str, list[dic
                 else "SUBSTANTIAL_GATING_RECOVERY" if guard_recovery >= GUARD_RECOVERY_LABEL_THRESHOLD
                 else "LIMITED_GATING_RECOVERY"
             ),
-            "guarded_within_0_03_of_baseline": (baseline_acc - guarded_acc) <= MAX_NEGATIVE_CONTROL_REGRESSION,
+            "guarded_within_0_03_of_baseline": (
+                _primary_count_delta(metrics, "greg_baseline", "greg_converter_guarded")
+                <= MAX_NEGATIVE_CONTROL_REGRESSION
+            ),
         }
 
     adjusted = holm_bonferroni(raw_ps) if raw_ps else {}
@@ -412,8 +447,7 @@ def summarize_registered(tasks: list[dict], records_by_model: dict[str, list[dic
     control_pass = False
     if control and control["complete"]:
         control_regs = {
-            condition: control["condition_metrics"]["greg_baseline"]["primary_accuracy"]
-            - control["condition_metrics"][condition]["primary_accuracy"]
+            condition: _primary_count_delta(control["condition_metrics"], "greg_baseline", condition)
             for condition in PRIMARY_CONTRASTS
         }
         control["negative_control_regressions"] = control_regs
