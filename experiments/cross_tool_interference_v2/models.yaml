@@ -1,0 +1,24 @@
+# Cross-Tool Interference v2 — frozen three-arm roster.
+# Exact configurations are inherited from the admitted Calendar Patch v1 branch.
+# Secrets remain in environment variables and are never committed.
+models:
+  - name: gpt-oss-20b
+    adapter: openai_compatible
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: gpt-oss:20b
+    invocation_style: native
+
+  - name: qwen3.5-397b
+    adapter: openai_compatible
+    base_url: https://ollama.com/v1
+    api_key_env: OLLAMA_API_KEY
+    model: qwen3.5:397b
+    invocation_style: native
+
+  - name: deepseek-v4-flash-nothink
+    adapter: ollama_native
+    api_key_env: OLLAMA_API_KEY
+    model: deepseek-v4-flash
+    extra_body:
+      think: false
