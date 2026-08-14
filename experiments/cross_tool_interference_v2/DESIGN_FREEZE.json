@@ -1,6 +1,6 @@
 {
   "study": "cross-tool-interference-v2",
-  "status": "PRE_CALL_DESIGN_FROZEN_PENDING_IMPLEMENTATION_AND_FRESH_HELDOUT",
+  "status": "PRE_CALL_DESIGN_FROZEN_PENDING_REMEDIATED_IMPLEMENTATION_GATE_AND_FRESH_HELDOUT",
   "scientific_role": "fresh confirmatory successor to Calendar Patch v1",
   "parent_branch": "research/cross-tool-interference-confirmatory-v2",
   "branch_base_execution_commit": "db24a0a06e438fd98a11b67ef661225211fe4419",
@@ -14,6 +14,30 @@
   "selected_hypothesis": "H6_TOOLSET_EXPANSION_INTERFERENCE",
   "selection_document": "experiments/cross_tool_interference_v2/HYPOTHESIS_SELECTION.md",
   "preregistration": "experiments/cross_tool_interference_v2/PREREGISTRATION.md",
+  "implementation_gate_history": [
+    {
+      "parent_head": "f6107b1ad59dfa61f7e295b468d6d0f7b1ec5909",
+      "result": "BLOCKED_V2_TEST",
+      "full_pytest_collected": 99,
+      "full_pytest_passed": 98,
+      "full_pytest_failed": 1,
+      "focused_v2_passed": 2,
+      "focused_v2_failed": 1,
+      "py_compile": "PASS",
+      "blocker": "exact IEEE-754 float equality assertion compared computed 8/80 regression (0.09999999999999998) to literal 0.1",
+      "heldout_authored": false,
+      "model_calls": false
+    }
+  ],
+  "implementation_remediation_001": {
+    "classification": "TEST_NUMERIC_COMPARISON_PRECISION_ONLY_PRE_HELDOUT",
+    "document": "experiments/cross_tool_interference_v2/IMPLEMENTATION_GATE_REMEDIATION_001.md",
+    "production_scoring_logic_modified": false,
+    "thresholds_modified": false,
+    "design_modified": false,
+    "test_change": "replace exact float equality for expected 0.1 diagnostic with pytest.approx(0.1)",
+    "fresh_gate_required": true
+  },
   "fresh_split": {
     "n_sets": 80,
     "conditions_per_set": 4,
