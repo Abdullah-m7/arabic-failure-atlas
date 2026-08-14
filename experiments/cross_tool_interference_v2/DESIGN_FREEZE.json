@@ -4,6 +4,7 @@
   "scientific_role": "fresh confirmatory successor to Calendar Patch v1",
   "parent_branch": "research/cross-tool-interference-confirmatory-v2",
   "branch_base_execution_commit": "db24a0a06e438fd98a11b67ef661225211fe4419",
+  "current_parent_head_for_clean_gate": "9e6213a041705129dae92790bd03e014f0d59e1b",
   "predecessor": {
     "study": "calendar-patch-v1",
     "confirmatory_verdict": "FAIL",
