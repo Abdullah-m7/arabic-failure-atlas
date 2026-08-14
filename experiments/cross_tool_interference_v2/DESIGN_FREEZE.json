@@ -1,6 +1,6 @@
 {
   "study": "cross-tool-interference-v2",
-  "status": "PRE_CALL_DESIGN_FROZEN_PENDING_REMEDIATED_IMPLEMENTATION_GATE_002_AND_FRESH_HELDOUT",
+  "status": "PRE_CALL_DESIGN_FROZEN_PENDING_REMEDIATED_IMPLEMENTATION_GATE_003_AND_FRESH_HELDOUT",
   "scientific_role": "fresh confirmatory successor to Calendar Patch v1",
   "parent_branch": "research/cross-tool-interference-confirmatory-v2",
   "branch_base_execution_commit": "db24a0a06e438fd98a11b67ef661225211fe4419",
@@ -40,6 +40,20 @@
       "blocker": "remaining exact IEEE-754 float equality assertion compared computed guard recovery (0.49999999999999944) to literal 0.5",
       "heldout_authored": false,
       "model_calls": false
+    },
+    {
+      "parent_head": "e20ad69d8b936f111db537a5d0194cb327a04a1a",
+      "result": "BLOCKED_V2_TEST",
+      "full_pytest_collected": 99,
+      "full_pytest_passed": 98,
+      "full_pytest_failed": 1,
+      "focused_v2_passed": 2,
+      "focused_v2_failed": 1,
+      "py_compile": "PASS",
+      "float_equality_audit": "PASS_NO_MATCHES",
+      "blocker": "production guard recovery computed mathematically exact 4/8 through subtraction of floating accuracies as 0.49999999999999944, so the already-inclusive >=0.50 preregistered label was misclassified as LIMITED",
+      "heldout_authored": false,
+      "model_calls": false
     }
   ],
   "implementation_remediation_001": {
@@ -59,8 +73,25 @@
     "design_modified": false,
     "test_change": "replace remaining exact float equality for expected 0.5 guard recovery with pytest.approx(0.5)",
     "test_module_float_equality_audit": "PASS_NO_REMAINING_EXACT_EQUALITY_ASSERTIONS_AGAINST_COMPUTED_FLOAT_METRICS",
+    "fresh_gate_required": true
+  },
+  "implementation_remediation_003": {
+    "classification": "NUMERIC_DECISION_REPRESENTATION_ALIGNMENT_PRE_HELDOUT",
+    "document": "experiments/cross_tool_interference_v2/IMPLEMENTATION_GATE_REMEDIATION_003.md",
+    "production_numeric_representation_modified": true,
+    "scientific_scoring_semantics_modified": false,
+    "thresholds_modified": false,
+    "design_modified": false,
+    "inclusive_guard_boundary_modified": false,
+    "registered_rule_remains": "guard_recovery_fraction >= 0.50 is SUBSTANTIAL_GATING_RECOVERY",
+    "implementation_change": "derive matched condition deltas and guard recovery from integer primary-success counts before division instead of subtracting already-rounded binary floating accuracies",
+    "numeric_decision_surface_audit": "COUNT_DERIVED_FOR_MATCHED_PRIMARY_DELTAS_AND_GUARD_RECOVERY",
+    "new_boundary_tests": [
+      "4/8 recovery is SUBSTANTIAL while 3/8 is LIMITED",
+      "6/80 target regression is below 0.08, 7/80 is above 0.08, and 2/80 negative-control regression is within 0.03"
+    ],
     "fresh_gate_required": true,
-    "note": "The exact parent HEAD for the next clean gate is recorded externally after the final pre-gate commit; this tracked freeze intentionally avoids self-referential HEAD binding."
+    "note": "The exact parent HEAD for the next clean gate is recorded externally after final documentation/freeze commits; this tracked freeze avoids self-reference."
   },
   "fresh_split": {
     "n_sets": 80,
@@ -121,6 +152,7 @@
   "negative_control_max_regression": 0.03,
   "guarded_converter_secondary": {
     "recovery_fraction_label_threshold": 0.5,
+    "recovery_fraction_label_operator": ">=",
     "can_rescue_global_h6_verdict": false
   },
   "seed": 20260814,
