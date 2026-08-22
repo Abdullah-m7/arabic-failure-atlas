@@ -45,7 +45,8 @@ TEX_SPECIALS = {"\\": r"\textbackslash{}", "{": r"\{", "}": r"\}",
 TAGS = [("P1", "kubrak2026arabicprompts"), ("P2", "ersoy2025toolcalling"),
         ("P3", "nacar2026language"), ("P4", "bariah2026telcoagent"),
         ("S1", "kulkarni2025massive"), ("S2", "arabicsurvey2025"),
-        ("MAST", "cemri2025mast"), ("MLCL", "luo2026lost")]
+        ("MAST", "cemri2025mast"), ("MLCL", "luo2026lost"),
+        ("UNESCO", "unesco2021ethics")]
 
 
 def esc_verbatim_line(line: str) -> str:
@@ -73,14 +74,19 @@ def bibliography() -> str:
     bib = (REPO / "paper" / "refs.bib").read_text(encoding="utf-8")
     entries = {}
     for m in re.finditer(r"@\w+\{([^,]+),(.*?)\n\}", bib, re.DOTALL):
-        fields = dict(re.findall(r"(\w+)\s*=\s*\{(.*?)\}[,\n]", m.group(2), re.DOTALL))
+        fields = dict(re.findall(r"(\w+)\s*=\s*\{(.*?)\}(?:,|\n|$)", m.group(2), re.DOTALL))
         entries[m.group(1).strip()] = fields
     items = []
     for tag, key in TAGS:
         f = entries[key]
         bits = []
         if "author" in f:
-            bits.append(f["author"].replace(" and ", ", ") + ".")
+            author = f["author"]
+            if author.endswith(" and others"):
+                author = author[:-len(" and others")] + " et al."
+            else:
+                author = author.replace(" and ", ", ") + "."
+            bits.append(author)
         bits.append("``" + re.sub(r"\s+", " ", f["title"].strip()) + ".''")
         if "booktitle" in f:
             bits.append(re.sub(r"\s+", " ", f["booktitle"]) + ".")
@@ -88,12 +94,14 @@ def bibliography() -> str:
             bits.append("pp.\\ " + f["pages"] + ".")
         if "eprint" in f:
             bits.append("arXiv:" + f["eprint"] + ".")
+        if "doi" in f:
+            bits.append("doi:" + f["doi"] + ".")
         if "year" in f:
             bits.append(f["year"] + ".")
         text = " ".join(bits).replace("&", "\\&").replace("_", "\\_")
         assert len(text) > 40, f"suspiciously short citation for {key}: {text!r}"
         items.append(f"\\bibitem[{tag}]{{{key}}} {text}")
-    return ("\\begin{thebibliography}{MLCL}\n"
+    return ("\\begin{thebibliography}{UNESCO}\n"
             "\\setlength{\\itemsep}{2pt}\n"
             + "\n".join(items) + "\n\\end{thebibliography}\n")
 
@@ -137,7 +145,7 @@ def main() -> None:
         body = body.replace(u, cmd)
 
     # every bracketed cite tag used in the text must resolve
-    used = set(re.findall(r"\[(P\d|S\d|MLCL|MAST)[\];]", src_md))
+    used = set(re.findall(r"\[(P\d|S\d|MLCL|MAST|UNESCO)[\];]", src_md))
     labels = {t for t, _ in TAGS}
     assert used <= labels, f"unresolved cite tags: {used - labels}"
 
