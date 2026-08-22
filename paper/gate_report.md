@@ -12,18 +12,15 @@
 | SCI-6 | PASS | 0 |
 | SCI-7 | PASS | 0 |
 | SCI-8 | PASS | 0 |
-| STY-1 | PASS | 0.8 |
+| STY-1 | PASS | 1.3 |
 | STY-2 | PASS | 0 |
-| STY-3 | PASS | 3 |
+| STY-3 | PASS | 0 |
 | STY-4 | PASS | 0 |
 | STY-5 | PASS | 0 |
 
 ## STY-1
-- em-dash/1000w = 0.8 (max 5)
-- semicolon/1000w = 2.9 (max 4)
+- em-dash/1000w = 1.3 (max 5)
+- semicolon/1000w = 3.2 (max 4)
 
 ## STY-3
-- inversion-family matches: 3 (max 3)
-- span 'not linguistic but civic' in: ...i prompts at 0.00. The gap is not linguistic but civic, and civic systems, unlike st...
-- span 'is not the barrier;' in: ...ini-3.5-flash-lite). Language is not the barrier; the calendar is. Gregorian da...
-- span ', not significant' in: ...0.03), and sits at −0.05 on M6, not significant after Holm. The earlier appar...
+- inversion-family matches: 0 (max 3)
